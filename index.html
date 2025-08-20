@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compound Interest Calculator</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Compound Interest Calculator</h1>
-        <form id="calculator-form">
-            <div class="form-group">
-                <label for="principal">Principal Amount ($):</label>
+        <div class="calculator-inputs">
+            <h1>Compound Interest Calculator</h1>
+            <form id="calculator-form">
+                <div class="form-group">
+                    <label for="principal">Principal Amount ($):</label>
                 <input type="number" id="principal" value="10000" required>
             </div>
             <div class="form-group">
@@ -44,10 +46,15 @@
                 <input type="number" id="contribution-increase" value="0">
             </div>
             <button type="submit">Calculate</button>
-        </form>
-        <div id="result" class="hidden">
-            <h2>Results</h2>
-            <p><strong>Final Balance: <span id="total-balance"></span></strong></p>
+            </form>
+        </div>
+        <div class="calculator-results">
+            <div id="result" class="hidden">
+                <h2>Results</h2>
+                <div id="chart-container" style="width: 100%; margin-bottom: 20px;">
+                    <canvas id="investment-chart"></canvas>
+                </div>
+                <p><strong>Final Balance: <span id="total-balance"></span></strong></p>
             <div id="stats">
                 <p>Total Contributions Made: <span id="total-invested"></span></p>
                 <p>Total Interest Earned: <span id="total-interest"></span></p>
@@ -67,6 +74,7 @@
                 <tbody id="breakdown-body">
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
     <script src="js/script.js"></script>
