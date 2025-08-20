@@ -66,10 +66,27 @@ function calculate() {
         return;
     }
 
+    // Validate compound frequency
+    const validFrequencies = [0, 1, 2, 4, 12, 24, 26, 52, 365];
+    if (!validFrequencies.includes(compoundingPeriodsPerYear)) {
+        alert("Please select a valid compounding frequency.");
+        return;
+    }
+
     // --- 2. INITIALIZE VARIABLES ---
     const totalMonths = years * 12;
-    const monthsPerCompoundingPeriod = 12 / compoundingPeriodsPerYear;
-    const monthlyInterestRate = annualInterestRate / 12;
+    
+    // Handle continuous compounding as a special case
+    let periodsPerYear;
+    if (compoundingPeriodsPerYear === 0) {
+        // Continuous compounding: A = P * e^(rt)
+        periodsPerYear = 365; // Use daily for calculation purposes, but apply continuous formula
+    } else {
+        // Discrete compounding: A = P * (1 + r/n)^(nt)
+        periodsPerYear = compoundingPeriodsPerYear;
+    }
+    
+    const monthsPerCompoundingPeriod = 12 / periodsPerYear;
 
     let currentBalance = principal;
     let totalInterestEarned = 0;
@@ -80,8 +97,6 @@ function calculate() {
 
     const breakdownBody = document.getElementById('breakdown-body');
     breakdownBody.innerHTML = '';
-
-    document.getElementById('encashed-interest-p').classList.add('hidden');
 
     let yearlyData = { interest: 0, contribution: 0, startingBalance: principal };
     const monthlyBreakdownData = {};
@@ -120,7 +135,19 @@ function calculate() {
 
         // 3b. Calculate interest on the current balance (including start-of-period contributions)
         const baseForInterest = monthStartingBalance + (reinvestInterest ? interestBucket : 0);
-        const interestThisMonth = baseForInterest * monthlyInterestRate;
+        
+        let interestThisMonth;
+        if (compoundingPeriodsPerYear === 0) {
+            // Continuous compounding: calculate monthly interest using continuous formula
+            // For monthly calculation: I = P * (e^(r/12) - 1)
+            interestThisMonth = baseForInterest * (Math.exp(annualInterestRate / 12) - 1);
+        } else {
+            // Calculate interest based on compound frequency
+            // For monthly calculation, we need to use the effective monthly rate
+            // Formula: (1 + r/n)^(n/12) - 1 for monthly interest
+            const effectiveMonthlyRate = Math.pow(1 + annualInterestRate / compoundingPeriodsPerYear, compoundingPeriodsPerYear / 12) - 1;
+            interestThisMonth = baseForInterest * effectiveMonthlyRate;
+        }
         
         interestBucket += interestThisMonth;
         totalInterestEarned += interestThisMonth;
@@ -224,13 +251,7 @@ function calculate() {
     document.getElementById('total-invested').textContent = formatMoney(totalInvested);
     document.getElementById('total-interest').textContent = formatMoney(totalInterestEarned);
 
-    if (!reinvestInterest) {
-        document.getElementById('encashed-interest').textContent = formatMoney(totalEncashedInterest);
-        document.getElementById('encashed-interest-p').classList.remove('hidden');
-    }
-
     document.getElementById('result').classList.remove('hidden');
-    document.getElementById('stats').classList.remove('hidden');
     renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData);
     addTableExpandListener(monthlyBreakdownData, reinvestInterest);
 }
@@ -377,17 +398,73 @@ function renderChart(labels, balanceData, contributionsData, interestData) {
                 axis: 'x',
                 intersect: false
             },
+            // Mobile-specific optimizations
+            devicePixelRatio: window.devicePixelRatio || 1,
+            onResize: function(chart, size) {
+                // Adjust font sizes for mobile
+                const isMobile = window.innerWidth <= 768;
+                const isSmallMobile = window.innerWidth <= 480;
+                
+                if (isSmallMobile) {
+                    if (chart.options.plugins && chart.options.plugins.title) {
+                        chart.options.plugins.title.font.size = 14;
+                    }
+                    if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+                        chart.options.plugins.legend.labels.font.size = 11;
+                    }
+                } else if (isMobile) {
+                    if (chart.options.plugins && chart.options.plugins.title) {
+                        chart.options.plugins.title.font.size = 16;
+                    }
+                    if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+                        chart.options.plugins.legend.labels.font.size = 12;
+                    }
+                }
+            },
             plugins: {
+                // Custom plugin to force y-axis configuration
+                customYAxis: {
+                    id: 'customYAxis',
+                    afterInit: function(chart) {
+                        console.log('🔧 Custom plugin: Forcing y-axis configuration');
+                        // Force our tick configuration
+                        chart.options.scales.y.ticks.autoSkip = false;
+                        chart.options.scales.y.ticks.maxTicksLimit = 8;
+                        
+                        // Ensure our values function is used
+                        chart.options.scales.y.ticks.values = function(context) {
+                            const max = yAxisMax;
+                            const step = max / 7;
+                            const ticks = [];
+                            
+                            for (let i = 0; i <= 7; i++) {
+                                ticks.push(Math.round(step * i * 100) / 100);
+                            }
+                            
+                            console.log('🔧 Plugin: Y-axis ticks generated:', ticks);
+                            return ticks;
+                        };
+                        
+                        chart.update('none');
+                    }
+                },
                 title: {
                     display: true,
                     text: 'Investment Growth Over Time',
                     font: {
-                        size: 16,
+                        size: window.innerWidth <= 480 ? 14 : (window.innerWidth <= 768 ? 16 : 18),
                         weight: '600'
                     }
                 },
                 legend: {
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: window.innerWidth <= 480 ? 11 : (window.innerWidth <= 768 ? 12 : 14)
+                        }
+                    }
                 },
                 tooltip: {
                     mode: 'index',
@@ -424,7 +501,7 @@ function renderChart(labels, balanceData, contributionsData, interestData) {
                         display: true,
                         text: 'Value ($)',
                         font: {
-                            size: 14,
+                            size: window.innerWidth <= 480 ? 12 : (window.innerWidth <= 768 ? 13 : 14),
                             weight: '600'
                         },
                         padding: {
@@ -432,34 +509,39 @@ function renderChart(labels, balanceData, contributionsData, interestData) {
                             bottom: 10
                         }
                     },
+                    // Force consistent y-axis behavior across all devices
+                    beginAtZero: true,
+                    suggestedMax: yAxisMax,
                     grid: {
                         display: true,
                         color: 'rgba(0, 0, 0, 0.1)',
                         lineWidth: 1
                     },
-                    beginAtZero: true,
-                    suggestedMax: yAxisMax,
                     ticks: {
-                        // Generate exactly 10 tick values
+                        // Generate consistent y-axis ticks across all devices
                         callback: function(value, index, values) {
                             return formatMoney(value);
                         },
-                        // Force exactly 10 ticks by providing the values
+                        // Force consistent tick generation - same logic as desktop
                         values: function(context) {
                             const max = yAxisMax;
-                            const step = max / 10;
+                            
+                            // Use the same calculation logic as desktop
+                            // Generate ticks that match the desktop behavior
+                            const step = max / 7; // 8 points (0 to 7)
                             const ticks = [];
                             
-                            for (let i = 0; i <= 10; i++) {
+                            for (let i = 0; i <= 7; i++) {
                                 ticks.push(Math.round(step * i * 100) / 100);
                             }
                             
-                            console.log('Generated Y-axis ticks:', ticks);
+                            console.log('🔧 Y-axis ticks generated:', ticks, 'Screen width:', window.innerWidth, 'Max value:', max, 'Step:', step);
                             return ticks;
                         },
                         autoSkip: false,
+                        maxTicksLimit: 8, // Force exactly 8 ticks
                         font: {
-                            size: 12
+                            size: window.innerWidth <= 480 ? 10 : (window.innerWidth <= 768 ? 11 : 12)
                         },
                         padding: 8,
                         color: '#666'
@@ -476,15 +558,98 @@ function renderChart(labels, balanceData, contributionsData, interestData) {
                 }
             },
             layout: {
-                padding: {
-                    top: 30,
-                    right: 30,
-                    bottom: 30,
-                    left: 50
-                }
+                padding: (function() {
+                    const isMobile = window.innerWidth <= 768;
+                    const isSmallMobile = window.innerWidth <= 480;
+                    
+                    if (isSmallMobile) {
+                        return {
+                            top: 12,
+                            right: 15,
+                            bottom: 12,
+                            left: 20
+                        };
+                    } else if (isMobile) {
+                        return {
+                            top: 15,
+                            right: 20,
+                            bottom: 15,
+                            left: 25
+                        };
+                    } else {
+                        return {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        };
+                    }
+                })()
             }
         }
     });
+    
+    // Force y-axis configuration immediately after chart creation
+    if (investmentChart) {
+        // Ensure our tick configuration is applied
+        investmentChart.options.scales.y.ticks.autoSkip = false;
+        investmentChart.options.scales.y.ticks.maxTicksLimit = 8;
+        
+        // Force the chart to use our custom values function
+        investmentChart.options.scales.y.ticks.values = function(context) {
+            const max = yAxisMax;
+            const step = max / 7; // 8 points (0 to 7)
+            const ticks = [];
+            
+            for (let i = 0; i <= 7; i++) {
+                ticks.push(Math.round(step * i * 100) / 100);
+            }
+            
+            return ticks;
+        };
+        
+        // Force update to apply our configuration
+        investmentChart.update('none');
+    }
+    
+    // Add resize listener for mobile optimization
+    const handleResize = () => {
+        if (investmentChart) {
+            // Force chart to use our custom tick configuration
+            investmentChart.options.scales.y.ticks.values = function(context) {
+                const max = yAxisMax;
+                const step = max / 7; // 8 points (0 to 7)
+                const ticks = [];
+                
+                for (let i = 0; i <= 7; i++) {
+                    ticks.push(Math.round(step * i * 100) / 100);
+                }
+                
+                return ticks;
+            };
+            
+            // Force the chart to respect our tick configuration
+            investmentChart.options.scales.y.ticks.autoSkip = false;
+            investmentChart.options.scales.y.ticks.maxTicksLimit = 8;
+            
+            investmentChart.resize();
+            investmentChart.update('none'); // Force update without animation
+        }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Initial mobile optimization and force tick configuration
+    if (window.innerWidth <= 768) {
+        handleResize();
+    }
+    
+    // Force initial tick configuration for all devices
+    setTimeout(() => {
+        if (investmentChart) {
+            handleResize();
+        }
+    }, 100);
 }
 
 // Update card colors to match chart colors

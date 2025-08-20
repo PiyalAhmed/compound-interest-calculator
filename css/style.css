@@ -115,6 +115,21 @@ body {
     transform: scale(1.1);
 }
 
+/* Form Help Text */
+.form-help {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: #6c757d;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+.form-help strong {
+    color: #495057;
+    font-weight: 600;
+}
+
 /* Contribution Schedule Layout */
 .contribution-schedule {
     background: #f8f9fa;
@@ -134,17 +149,26 @@ body {
     margin-bottom: 0;
 }
 
+.centered-row {
+    justify-content: center;
+}
+
 .schedule-label {
     font-size: 0.9rem;
     color: #495057;
     font-weight: 500;
-    min-width: 120px;
+    min-width: 140px;
     text-align: right;
 }
 
 .radio-options {
     display: flex;
     gap: 16px;
+}
+
+.vertical-options {
+    flex-direction: column;
+    gap: 12px;
 }
 
 .radio-option {
@@ -236,14 +260,50 @@ button:hover::before {
     padding: 20px;
     border-radius: 8px;
     border: 1px solid #e9ecef;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     height: 500px;
     position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
 #chart-container canvas {
     width: 100% !important;
     height: 100% !important;
+    touch-action: manipulation;
+}
+
+/* Chart container hover effect */
+#chart-container:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Mobile chart improvements */
+@media (max-width: 768px) {
+    /* Ensure chart text is readable on mobile */
+    #chart-container {
+        font-size: 14px;
+        overflow: hidden;
+    }
+    
+    /* Mobile chart canvas optimization */
+    #chart-container canvas {
+        max-width: 100%;
+        height: auto !important;
+        touch-action: manipulation;
+    }
+    
+    /* Mobile chart container optimization */
+    #chart-container {
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Ensure chart fits mobile viewport */
+    #chart-container .chartjs-chart {
+        width: 100% !important;
+        height: 100% !important;
+    }
 }
 
 /* Results Summary - Compact Cards with Colors Matching Chart */
@@ -312,6 +372,42 @@ button:hover::before {
     border: 1px solid #e9ecef;
 }
 
+/* Table title and hint - always in normal page flow */
+.table-container h3,
+.table-container .monthly-hint {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Mobile padding for table section */
+@media (max-width: 768px) {
+    .table-container h3 {
+        padding: 0 20px;
+        margin-bottom: 16px;
+    }
+    
+    .table-container .monthly-hint {
+        padding: 0 20px;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-container h3 {
+        padding: 0 16px;
+        margin-bottom: 14px;
+    }
+    
+    .table-container .monthly-hint {
+        padding: 0 16px;
+        margin-bottom: 18px;
+    }
+}
+
 .table-container h3 {
     color: #1a1a1a;
     margin-bottom: 16px;
@@ -323,14 +419,21 @@ button:hover::before {
 /* Monthly details hint styling */
 .monthly-hint {
     text-align: center;
-    color: #007AFF;
-    margin-bottom: 16px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 8px 16px;
-    background: rgba(0, 122, 255, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid #007AFF;
+    color: #6c757d;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    position: relative;
+}
+
+.monthly-hint::before {
+    content: '💡';
+    margin-right: 8px;
+    font-size: 1rem;
 }
 
 /* Table Styles - Compact */
@@ -343,6 +446,7 @@ table {
     overflow: hidden;
     border: 1px solid #e9ecef;
     font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 th, td {
@@ -352,12 +456,12 @@ th, td {
 }
 
 th {
-    background: #f8f9fa;
-    color: #495057;
+    background: #007AFF;
+    color: white;
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 
 td {
@@ -365,8 +469,17 @@ td {
     font-weight: 400;
 }
 
-tr:hover {
+/* Alternating row colors for yearly rows only */
+tbody tr[data-year]:nth-child(even) {
     background-color: #f8f9fa;
+}
+
+tbody tr[data-year]:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+tbody tr[data-year]:hover {
+    background-color: rgba(0, 122, 255, 0.05);
     transition: background-color 0.2s ease;
 }
 
@@ -380,14 +493,15 @@ tr[data-year]:hover {
 }
 
 tr.expanded {
-    background-color: #e8f5e8;
+    background-color: rgba(0, 122, 255, 0.1) !important;
+    border-left: 3px solid #007AFF;
 }
 
 .monthly-row th {
-    background: #f8f9fa;
-    color: #666;
-    font-style: italic;
+    background: #6c757d;
+    color: white;
     font-size: 0.75rem;
+    padding: 8px 6px;
     font-weight: 500;
 }
 
@@ -398,9 +512,80 @@ tr.expanded {
     color: #666;
 }
 
+/* Monthly row styling - override any inherited backgrounds */
+.monthly-row {
+    background-color: #fafafa !important;
+}
+
+.monthly-row td {
+    background-color: #fafafa !important;
+}
+
+/* Monthly row headers keep their dark styling */
+.monthly-row th {
+    background: #6c757d !important;
+    color: white;
+    font-size: 0.75rem;
+    padding: 8px 6px;
+    font-weight: 500;
+}
+
+/* Ensure monthly rows are never affected by nth-child selectors */
+.monthly-row:nth-child(even),
+.monthly-row:nth-child(odd) {
+    background-color: #fafafa !important;
+}
+
 /* Utility Classes */
 .hidden {
     display: none;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+    /* Better touch targets */
+    .radio-option input[type="radio"] {
+        transform: scale(1.2);
+        margin-right: 10px;
+    }
+    
+    .radio-option label {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    /* Improved form spacing */
+    .contribution-schedule {
+        padding: 20px;
+        margin-top: 8px;
+    }
+    
+    /* Better button touch area */
+    button {
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    /* Chart legend mobile optimization */
+    .chart-legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    /* Mobile table optimization */
+    .table-container {
+        overflow: hidden;
+    }
+    
+    .table-container table {
+        font-size: 0.75rem;
+    }
+    
+    .table-container th,
+    .table-container td {
+        padding: 8px 4px;
+        font-size: 0.75rem;
+    }
 }
 
 /* Responsive Design */
@@ -412,22 +597,29 @@ tr.expanded {
     
     .calculator-inputs {
         position: static;
-        order: 2;
+        order: 1;
+        height: auto;
+        max-height: none;
     }
     
     .calculator-results {
-        order: 1;
+        order: 2;
+        height: auto;
+        max-height: none;
     }
 }
 
 @media (max-width: 768px) {
     .container {
         padding: 16px;
+        gap: 16px;
     }
     
     .calculator-inputs,
     .calculator-results {
         padding: 20px;
+        height: auto;
+        max-height: none;
     }
     
     .calculator-inputs h1 {
@@ -447,7 +639,8 @@ tr.expanded {
     }
     
     .schedule-label {
-        margin-right: 0;
+        min-width: auto;
+        text-align: left;
         margin-bottom: 4px;
     }
     
@@ -459,19 +652,123 @@ tr.expanded {
     .form-group input[type="checkbox"],
     .form-group select {
         padding: 10px;
+        font-size: 16px; /* Prevents zoom on iOS */
     }
     
     button {
-        padding: 12px;
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+    
+    /* Table responsive improvements */
+    .table-container {
+        overflow: visible;
+        margin: 0;
+        padding: 20px;
+    }
+    
+    .table-container table {
+        overflow-x: auto;
+        margin: 0;
+        padding: 0;
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    table {
+        min-width: 100%;
+        font-size: 0.8rem;
+        table-layout: auto;
     }
     
     th, td {
-        padding: 10px 6px;
-        font-size: 0.85rem;
+        padding: 10px 8px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        min-width: auto;
+    }
+    
+    /* Chart container mobile optimization */
+    #chart-container {
+        height: 350px;
+        margin: 0 0 24px 0;
+        padding: 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #chart-container canvas {
+        max-height: 100%;
+        touch-action: manipulation;
+    }
+    
+    /* Chart legend mobile optimization */
+    .chart-legend {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .chart-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+    
+    /* Chart title mobile optimization */
+    #chart-container .chart-title {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+    
+    /* Chart tooltip mobile optimization */
+    .chartjs-tooltip {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Mobile chart text optimization */
+    .chartjs-chart {
+        font-size: 14px !important;
+    }
+    
+    /* Mobile chart axis labels */
+    .chartjs-chart .chartjs-axis-label {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Mobile chart tick labels */
+    .chartjs-chart .chartjs-tick-label {
+        font-size: 11px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Mobile chart legend text */
+    .chartjs-chart .chartjs-legend-item {
+        font-size: 12px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Monthly hint mobile styling - no horizontal scroll */
+    .monthly-hint {
+        font-size: 0.8rem;
+        padding: 10px 16px;
+        margin-bottom: 20px;
     }
 }
 
 @media (max-width: 480px) {
+    .container {
+        padding: 12px;
+        gap: 12px;
+    }
+    
     .calculator-inputs,
     .calculator-results {
         padding: 16px;
@@ -479,9 +776,137 @@ tr.expanded {
     
     .calculator-inputs h1 {
         font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        font-size: 0.8rem;
+    }
+    
+    .form-group input[type="number"],
+    .form-group input[type="checkbox"],
+    .form-group select {
+        padding: 8px 10px;
+        font-size: 16px;
+    }
+    
+    button {
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+    
+    /* Table mobile optimization */
+    .table-container {
+        margin: 0;
+        padding: 16px;
+    }
+    
+    .table-container table {
+        overflow-x: auto;
+        margin: 0;
+        padding: 0;
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        font-size: 0.75rem;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.75rem;
+        white-space: normal;
+        word-wrap: break-word;
     }
     
     .monthly-row td {
-        padding-left: 16px;
+        padding-left: 12px;
+    }
+    
+    /* Chart container small mobile */
+    #chart-container {
+        height: 300px;
+        margin: 0 0 20px 0;
+        padding: 12px;
+        border-radius: 6px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Chart small mobile optimizations */
+    #chart-container canvas {
+        max-height: 100%;
+        touch-action: manipulation;
+    }
+    
+    /* Chart legend small mobile */
+    .chart-legend {
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .chart-legend-item {
+        font-size: 0.75rem;
+        gap: 6px;
+    }
+    
+    /* Chart title small mobile */
+    #chart-container .chart-title {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    /* Chart tooltip small mobile */
+    .chartjs-tooltip {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+    
+    /* Small mobile chart text optimization */
+    .chartjs-chart {
+        font-size: 13px !important;
+    }
+    
+    /* Small mobile chart axis labels */
+    .chartjs-chart .chartjs-axis-label {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Small mobile chart tick labels */
+    .chartjs-chart .chartjs-tick-label {
+        font-size: 10px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Small mobile chart legend text */
+    .chartjs-chart .chartjs-legend-item {
+        font-size: 11px !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Monthly hint small mobile - no horizontal scroll */
+    .monthly-hint {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+    }
+    
+    /* Results summary mobile */
+    .results-summary {
+        gap: 8px;
+    }
+    
+    .result-card {
+        padding: 16px;
+    }
+    
+    .result-card h3 {
+        font-size: 0.75rem;
+    }
+    
+    .result-card p {
+        font-size: 1.3rem;
     }
 }
