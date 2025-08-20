@@ -94,6 +94,86 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial summary update
     updateEncashSummary();
+    
+    // Add event listener for additional contribution field
+    const additionalContributionField = document.getElementById('additional-contribution');
+    const contributionScheduleSection = document.getElementById('contribution-schedule-section');
+    const contributionIncreaseSection = document.getElementById('contribution-increase-section');
+    const stopContributingSection = document.getElementById('stop-contributing-section');
+    
+    function updateContributionSections() {
+        const contributionAmount = parseFloat(additionalContributionField.value) || 0;
+        
+        if (contributionAmount > 0) {
+            contributionScheduleSection.classList.remove('hidden');
+            contributionIncreaseSection.classList.remove('hidden');
+            stopContributingSection.classList.remove('hidden');
+        } else {
+            contributionScheduleSection.classList.add('hidden');
+            contributionIncreaseSection.classList.add('hidden');
+            stopContributingSection.classList.add('hidden');
+        }
+    }
+    
+    // Update sections when contribution amount changes
+    additionalContributionField.addEventListener('input', updateContributionSections);
+    additionalContributionField.addEventListener('change', updateContributionSections);
+    
+    // Initial check on page load
+    updateContributionSections();
+    
+    // Add event listeners for stop contribution period changes (month vs year)
+    const stopContributingCheckbox = document.getElementById('stop-contributing-checkbox');
+    const stopContributingOptions = document.getElementById('stop-contributing-options');
+    const stopContributionPeriodSelect = document.getElementById('stop-contribution-period-select');
+    const stopContributionTimingSelect = document.getElementById('stop-contribution-timing-select');
+    const stopContributionYearInput = document.getElementById('stop-contribution-year-input');
+    const stopContributionMonthRow = document.getElementById('stop-contribution-month-row');
+    const stopContributionMonthSelect = document.getElementById('stop-contribution-month-select');
+    const stopContributionSummaryText = document.getElementById('stop-contribution-summary-text');
+    
+    function updateStopContributionSummary() {
+        const period = stopContributionPeriodSelect.value;
+        const timing = stopContributionTimingSelect.value;
+        const year = stopContributionYearInput.value;
+        const month = stopContributionMonthSelect.options[stopContributionMonthSelect.selectedIndex].text;
+        
+        let summaryText = `Contributions will continue until the ${timing} of `;
+        
+        if (period === 'month') {
+            summaryText += `${month} in year ${year}`;
+        } else {
+            summaryText += `year ${year}`;
+        }
+        
+        summaryText += ', then stop. Investment growth continues without new contributions.';
+        stopContributionSummaryText.textContent = summaryText;
+    }
+    
+    // Handle checkbox toggle for stop contributing options
+    stopContributingCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            stopContributingOptions.classList.remove('hidden');
+        } else {
+            stopContributingOptions.classList.add('hidden');
+        }
+    });
+    
+    stopContributionPeriodSelect.addEventListener('change', function() {
+        if (this.value === 'month') {
+            stopContributionMonthRow.classList.remove('hidden');
+        } else {
+            stopContributionMonthRow.classList.add('hidden');
+        }
+        updateStopContributionSummary();
+    });
+    
+    stopContributionTimingSelect.addEventListener('change', updateStopContributionSummary);
+    stopContributionYearInput.addEventListener('input', updateStopContributionSummary);
+    stopContributionMonthSelect.addEventListener('change', updateStopContributionSummary);
+    
+    // Initial summary update
+    updateStopContributionSummary();
 });
 
 document.getElementById('calculator-form').addEventListener('submit', function(event) {
@@ -112,18 +192,41 @@ function calculate() {
     const contributionIncreaseFrequency = parseInt(document.getElementById('contribution-increase-frequency').value) || 1;
     const compoundingPeriodsPerYear = parseInt(document.getElementById('compound-period').value);
     
-    // New contribution timing options
+        // New contribution timing options
     const contributionTiming = document.getElementById('contribution-timing-select').value;
     const contributionFrequency = document.getElementById('contribution-frequency-select').value;
-
+    
+    // Stop contribution timing options
+    const stopContributingEnabled = document.getElementById('stop-contributing-checkbox')?.checked || false;
+    const stopContributionPeriod = document.getElementById('stop-contribution-period-select')?.value || 'year';
+    const stopContributionTiming = document.getElementById('stop-contribution-timing-select')?.value || 'start';
+    const stopContributionYear = parseInt(document.getElementById('stop-contribution-year-input')?.value) || 1;
+    const stopContributionMonth = parseInt(document.getElementById('stop-contribution-month-select')?.value) || 1;
+    
     // Encash timing options
     const encashTiming = document.getElementById('encash-timing-select')?.value || 'start';
     const encashPeriod = document.getElementById('encash-period-select')?.value || 'year';
     const encashStartYear = parseInt(document.getElementById('encash-year-input')?.value) || 1;
     const encashStartMonth = parseInt(document.getElementById('encash-month-select')?.value) || 1;
+    
+    // Tax and inflation options
+    const taxRate = parseFloat(document.getElementById('tax-rate').value) || 0;
+    const taxApplication = document.getElementById('tax-application').value;
+    const inflationRate = parseFloat(document.getElementById('inflation-rate').value) || 0;
 
     if (isNaN(principal) || isNaN(annualInterestRate) || isNaN(years) || isNaN(additionalContribution) || isNaN(contributionIncreasePercent)) {
         alert("Please enter valid numbers in all fields.");
+        return;
+    }
+    
+    // Validate tax and inflation rates
+    if (taxRate < 0 || taxRate > 100) {
+        alert("Tax rate must be between 0 and 100.");
+        return;
+    }
+    
+    if (inflationRate < 0 || inflationRate > 100) {
+        alert("Inflation rate must be between 0 and 100.");
         return;
     }
 
@@ -148,6 +251,25 @@ function calculate() {
             }
             if (encashStartMonth < 1 || encashStartMonth > 12) {
                 alert("Encash start month must be between 1 and 12.");
+                return;
+            }
+        }
+    }
+    
+    // Validate stop contribution timing
+    if (additionalContribution > 0 && stopContributingEnabled) {
+        if (stopContributionPeriod === 'year') {
+            if (stopContributionYear < 1 || stopContributionYear > years) {
+                alert(`Stop contribution year must be between 1 and ${years} (investment period).`);
+                return;
+            }
+        } else {
+            if (stopContributionYear < 1 || stopContributionYear > years) {
+                alert(`Stop contribution year must be between 1 and ${years} (investment period).`);
+                return;
+            }
+            if (stopContributionMonth < 1 || stopContributionMonth > 12) {
+                alert("Stop contribution month must be between 1 and 12.");
                 return;
             }
         }
@@ -189,6 +311,27 @@ function calculate() {
         }
         return additionalContribution;
     }
+    
+    // Function to check if we should stop contributing based on month
+    function shouldStopContributing(month) {
+        if (additionalContribution === 0 || !stopContributingEnabled) return false;
+        
+        if (stopContributionPeriod === 'year') {
+            if (stopContributionTiming === 'start') {
+                return month > (stopContributionYear - 1) * 12;
+            } else {
+                return month > stopContributionYear * 12;
+            }
+        } else {
+            // Month-based stop contributing
+            const targetMonth = (stopContributionYear - 1) * 12 + stopContributionMonth;
+            if (stopContributionTiming === 'start') {
+                return month > targetMonth;
+            } else {
+                return month > targetMonth;
+            }
+        }
+    }
 
     const breakdownBody = document.getElementById('breakdown-body');
     breakdownBody.innerHTML = '';
@@ -210,22 +353,32 @@ function calculate() {
         if (contributionFrequency === 'month') {
             // Monthly contribution
             if (contributionTiming === 'start') {
-                // Add contribution at start of month (before interest calculation)
-                contributionThisMonth = getCurrentContributionAmount(month);
-                currentBalance += contributionThisMonth;
-                totalContributions += contributionThisMonth;
-                yearlyData.contribution += contributionThisMonth;
-                monthStartingBalance = currentBalance; // Update starting balance to include contribution
+                // Check if we should stop contributing
+                if (shouldStopContributing(month)) {
+                    contributionThisMonth = 0;
+                } else {
+                    // Add contribution at start of month (before interest calculation)
+                    contributionThisMonth = getCurrentContributionAmount(month);
+                    currentBalance += contributionThisMonth;
+                    totalContributions += contributionThisMonth;
+                    yearlyData.contribution += contributionThisMonth;
+                    monthStartingBalance = currentBalance; // Update starting balance to include contribution
+                }
             }
         } else {
             // Yearly contribution
             if (month % 12 === 1 && contributionTiming === 'start') {
-                // Add yearly contribution at start of year
-                contributionThisMonth = getCurrentContributionAmount(month) * 12;
-                currentBalance += contributionThisMonth;
-                totalContributions += contributionThisMonth;
-                yearlyData.contribution += contributionThisMonth;
-                monthStartingBalance = currentBalance; // Update starting balance to include contribution
+                // Check if we should stop contributing
+                if (shouldStopContributing(month)) {
+                    contributionThisMonth = 0;
+                } else {
+                    // Add yearly contribution at start of year
+                    contributionThisMonth = getCurrentContributionAmount(month) * 12;
+                    currentBalance += contributionThisMonth;
+                    totalContributions += contributionThisMonth;
+                    yearlyData.contribution += contributionThisMonth;
+                    monthStartingBalance = currentBalance; // Update starting balance to include contribution
+                }
             }
         }
 
@@ -253,20 +406,30 @@ function calculate() {
         if (contributionFrequency === 'month') {
             // Monthly contribution
             if (contributionTiming === 'end') {
-                // Add contribution at end of month (after interest calculation)
-                contributionThisMonth = getCurrentContributionAmount(month);
-                currentBalance += contributionThisMonth;
-                totalContributions += contributionThisMonth;
-                yearlyData.contribution += contributionThisMonth;
+                // Check if we should stop contributing
+                if (shouldStopContributing(month)) {
+                    contributionThisMonth = 0;
+                } else {
+                    // Add contribution at end of month (after interest calculation)
+                    contributionThisMonth = getCurrentContributionAmount(month);
+                    currentBalance += contributionThisMonth;
+                    totalContributions += contributionThisMonth;
+                    yearlyData.contribution += contributionThisMonth;
+                }
             }
         } else {
             // Yearly contribution
             if (month % 12 === 0 && contributionTiming === 'end') {
-                // Add yearly contribution at end of year
-                contributionThisMonth = getCurrentContributionAmount(month) * 12;
-                currentBalance += contributionThisMonth;
-                totalContributions += contributionThisMonth;
-                yearlyData.contribution += contributionThisMonth;
+                // Check if we should stop contributing
+                if (shouldStopContributing(month)) {
+                    contributionThisMonth = 0;
+                } else {
+                    // Add yearly contribution at end of year
+                    contributionThisMonth = getCurrentContributionAmount(month) * 12;
+                    currentBalance += contributionThisMonth;
+                    totalContributions += contributionThisMonth;
+                    yearlyData.contribution += contributionThisMonth;
+                }
             }
         }
 
@@ -430,9 +593,14 @@ function calculate() {
                 <td>${year}</td>
                 <td>${formatMoney(yearlyData.startingBalance)}</td>
                 <td>${formatMoney(yearlyData.interest)}</td>
-                <td>${formatMoney(yearlyData.contribution)}</td>
-                <td>${formatMoney(endingBalanceForTable)}</td>
             `;
+            
+            // Add contributions column only if there are additional contributions
+            if (additionalContribution > 0) {
+                rowHTML += `<td>${formatMoney(yearlyData.contribution)}</td>`;
+            }
+            
+            rowHTML += `<td>${formatMoney(endingBalanceForTable)}</td>`;
             
             if (!reinvestInterest) {
                 // Calculate yearly encashed amount
@@ -536,13 +704,67 @@ function calculate() {
         encashedAmountCard.classList.add('hidden');
         encashedColumnHeader.classList.add('hidden');
     }
+    
+    // Show/hide contributions column based on whether there are additional contributions
+    const contributionsColumnHeader = document.getElementById('contributions-column-header');
+    if (additionalContribution > 0) {
+        contributionsColumnHeader.classList.remove('hidden');
+    } else {
+        contributionsColumnHeader.classList.add('hidden');
+    }
+    
+    // Calculate and show tax and inflation results
+    const taxCard = document.getElementById('tax-card');
+    const inflationCard = document.getElementById('inflation-card');
+    
+    if (taxRate > 0 || inflationRate > 0) {
+        // Calculate final balance after tax
+        let balanceAfterTax = finalBalance;
+        if (taxRate > 0) {
+            if (taxApplication === 'interest') {
+                // Tax on interest only (more realistic)
+                const taxableAmount = totalInterestEarned + totalEncashedInterest;
+                const taxOwed = taxableAmount * (taxRate / 100);
+                balanceAfterTax = finalBalance - taxOwed;
+            } else {
+                // Tax on whole amount
+                balanceAfterTax = finalBalance * (1 - taxRate / 100);
+            }
+            document.getElementById('balance-after-tax').textContent = formatMoney(balanceAfterTax);
+            taxCard.classList.remove('hidden');
+        } else {
+            taxCard.classList.add('hidden');
+        }
+        
+        // Calculate final balance after tax and inflation
+        if (inflationRate > 0) {
+            const balanceAfterInflation = balanceAfterTax * Math.pow(1 - inflationRate / 100, years);
+            document.getElementById('balance-after-inflation').textContent = formatMoney(balanceAfterInflation);
+            
+            // Update the inflation card title based on whether tax is applied
+            const inflationCardTitle = inflationCard.querySelector('h3');
+            if (taxRate > 0) {
+                inflationCardTitle.textContent = 'Final Balance After Tax & Inflation';
+            } else {
+                inflationCardTitle.textContent = 'Final Balance After Inflation';
+            }
+            
+            inflationCard.classList.remove('hidden');
+        } else {
+            inflationCard.classList.add('hidden');
+        }
+    } else {
+        // Hide both cards if no tax or inflation
+        taxCard.classList.add('hidden');
+        inflationCard.classList.add('hidden');
+    }
 
     document.getElementById('result').classList.remove('hidden');
     renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData, totalEncashedData, reinvestInterest);
-    addTableExpandListener(monthlyBreakdownData, reinvestInterest);
+    addTableExpandListener(monthlyBreakdownData, reinvestInterest, additionalContribution);
 }
 
-function addTableExpandListener(monthlyData, reinvestInterest) {
+function addTableExpandListener(monthlyData, reinvestInterest, additionalContribution) {
     const tableBody = document.getElementById('breakdown-body');
     
     // Remove existing listeners to prevent duplicates
@@ -574,9 +796,14 @@ function addTableExpandListener(monthlyData, reinvestInterest) {
             <th>Month</th>
             <th>Starting Balance</th>
             <th>Interest Earned</th>
-            <th>Contribution</th>
-            <th>Ending Balance</th>
         `;
+        
+        // Add contributions column only if there are additional contributions
+        if (additionalContribution > 0) {
+            headerHTML += `<th>Contribution</th>`;
+        }
+        
+        headerHTML += `<th>Ending Balance</th>`;
         
         if (!reinvestInterest) {
             headerHTML += `<th>Encashed Amount</th>`;
@@ -589,20 +816,25 @@ function addTableExpandListener(monthlyData, reinvestInterest) {
             const monthlyRow = document.createElement('tr');
             monthlyRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
 
-            // Create row with or without encashed column based on interest strategy
-            let rowHTML = `
-                <td>${data.month}</td>
-                <td>${formatMoney(data.startingBalance)}</td>
-                <td>${formatMoney(data.interest)}</td>
-                <td>${formatMoney(data.contribution)}</td>
-                <td>${formatMoney(data.endingBalance)}</td>
-            `;
-            
-            if (!reinvestInterest) {
-                rowHTML += `<td>${formatMoney(data.encashedAmount)}</td>`;
-            }
-            
-            monthlyRow.innerHTML = rowHTML;
+                    // Create row with or without encashed column based on interest strategy
+        let rowHTML = `
+            <td>${data.month}</td>
+            <td>${formatMoney(data.startingBalance)}</td>
+            <td>${formatMoney(data.interest)}</td>
+        `;
+        
+        // Add contributions column only if there are additional contributions
+        if (additionalContribution > 0) {
+            rowHTML += `<td>${formatMoney(data.contribution)}</td>`;
+        }
+        
+        rowHTML += `<td>${formatMoney(data.endingBalance)}</td>`;
+        
+        if (!reinvestInterest) {
+            rowHTML += `<td>${formatMoney(data.encashedAmount)}</td>`;
+        }
+        
+        monthlyRow.innerHTML = rowHTML;
             fragment.appendChild(monthlyRow);
         });
 
@@ -637,7 +869,9 @@ function renderChart(labels, balanceData, contributionsData, interestData, encas
         contributions: '#ff9f40', // Orange - friendly alternative to red
         interest: '#36a2eb',      // Blue - matches card 2
         balance: '#4bc0c0',       // Teal - matches card 3
-        encashed: '#4caf50'       // Green - matches encashed amount card
+        encashed: '#4caf50',      // Green - matches encashed amount card
+        tax: '#ff5722',           // Red-Orange - matches tax card
+        inflation: '#9c27b0'      // Purple - matches inflation card
     };
     
     // Update card colors to match chart colors
@@ -1014,5 +1248,25 @@ function updateCardColors(chartColors) {
         encashedCard.style.color = chartColors.encashed; // Full opacity text
         encashedCard.querySelector('h3').style.color = chartColors.encashed;
         encashedCard.querySelector('p').style.color = chartColors.encashed;
+    }
+    
+    // Card 5: Final Balance After Tax (Red-Orange) - matches tax card
+    const taxCard = document.getElementById('tax-card');
+    if (taxCard && !taxCard.classList.contains('hidden')) {
+        taxCard.style.background = `${chartColors.tax}20`; // Low opacity background like chart fill
+        taxCard.style.borderColor = chartColors.tax;
+        taxCard.style.color = chartColors.tax; // Full opacity text
+        taxCard.querySelector('h3').style.color = chartColors.tax;
+        taxCard.querySelector('p').style.color = chartColors.tax;
+    }
+    
+    // Card 6: Final Balance After Tax & Inflation (Purple) - matches inflation card
+    const inflationCard = document.getElementById('inflation-card');
+    if (inflationCard && !inflationCard.classList.contains('hidden')) {
+        inflationCard.style.background = `${chartColors.inflation}20`; // Low opacity background like chart fill
+        inflationCard.style.borderColor = chartColors.inflation;
+        inflationCard.style.color = chartColors.inflation; // Full opacity text
+        inflationCard.querySelector('h3').style.color = chartColors.inflation;
+        inflationCard.querySelector('p').style.color = chartColors.inflation;
     }
 }

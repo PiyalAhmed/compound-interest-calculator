@@ -109,10 +109,10 @@
                 
                 <div class="form-group">
                     <label for="additional-contribution">Additional Contribution ($)</label>
-                    <input type="number" id="additional-contribution" value="100" min="0" step="0.01">
+                    <input type="number" id="additional-contribution" value="0" min="0" step="0.01">
                 </div>
                 
-                <div class="form-group">
+                <div id="contribution-schedule-section" class="form-group hidden">
                     <label>Contribution Schedule</label>
                     <div class="encash-timing-container">
                         <div class="timing-row">
@@ -133,7 +133,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
+                <div id="contribution-increase-section" class="form-group hidden">
                     <label>Contribution Increase</label>
                     <div class="encash-timing-container">
                         <div class="timing-row">
@@ -156,6 +156,90 @@
                                 <option value="52">After every Week</option>
                                 <option value="365">After every Day</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stop Contributing After Section (hidden by default) -->
+                <div id="stop-contributing-section" class="form-group hidden">
+                    <label>
+                        <input type="checkbox" id="stop-contributing-checkbox" style="margin-right: 8px;">
+                        Stop Contributing After
+                    </label>
+                    <div id="stop-contributing-options" class="encash-timing-container hidden">
+                        <div class="timing-row">
+                            <label for="stop-contribution-period-select">Time Period:</label>
+                            <select id="stop-contribution-period-select">
+                                <option value="year">Year</option>
+                                <option value="month">Specific Month</option>
+                            </select>
+                        </div>
+                        
+                        <div class="timing-row">
+                            <label for="stop-contribution-timing-select">Timing:</label>
+                            <select id="stop-contribution-timing-select">
+                                <option value="start">Beginning of</option>
+                                <option value="end">End of</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Year selection (always visible) -->
+                        <div class="timing-row">
+                            <label for="stop-contribution-year-input">Year:</label>
+                            <input type="number" id="stop-contribution-year-input" value="1" min="1" style="width: 80px;">
+                        </div>
+                        
+                        <!-- Month selection (hidden by default) -->
+                        <div id="stop-contribution-month-row" class="timing-row hidden">
+                            <label for="stop-contribution-month-select">Month:</label>
+                            <select id="stop-contribution-month-select">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Summary text -->
+                        <div class="encash-summary">
+                            <small id="stop-contribution-summary-text">Contributions will continue until the beginning of year 1, then stop. Investment growth continues without new contributions.</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tax & Inflation</label>
+                    <div class="encash-timing-container">
+                        <div class="timing-row">
+                            <label for="tax-rate">Tax Rate:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="number" id="tax-rate" value="0" min="0" max="100" step="0.01" style="width: 80px;">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="timing-row">
+                            <label for="tax-application">Tax Applied To:</label>
+                            <select id="tax-application">
+                                <option value="interest" selected>Interest Only</option>
+                                <option value="whole">Whole Amount</option>
+                            </select>
+                        </div>
+                        
+                        <div class="timing-row">
+                            <label for="inflation-rate">Inflation Rate:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="number" id="inflation-rate" value="0" min="0" max="100" step="0.01" style="width: 80px;">
+                                <span>%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -190,6 +274,17 @@
                         <h3>Total Encashed Amount</h3>
                         <p id="total-encashed">$0.00</p>
                     </div>
+                    
+                    <!-- Tax & Inflation Cards (hidden by default) -->
+                    <div id="tax-card" class="result-card hidden">
+                        <h3>Final Balance After Tax</h3>
+                        <p id="balance-after-tax">$0.00</p>
+                    </div>
+                    
+                    <div id="inflation-card" class="result-card hidden">
+                        <h3>Final Balance After Tax & Inflation</h3>
+                        <p id="balance-after-inflation">$0.00</p>
+                    </div>
                 </div>
                 
 
@@ -203,7 +298,7 @@
                                 <th>Year</th>
                                 <th>Starting Balance</th>
                                 <th>Interest Earned</th>
-                                <th>Contributions</th>
+                                <th id="contributions-column-header">Contributions</th>
                                 <th>Ending Balance</th>
                                 <!-- Encashed Amount Column (hidden by default) -->
                                 <th id="encashed-column-header" class="hidden">Encashed Amount</th>

@@ -164,7 +164,7 @@ body {
 }
 
 .timing-row label {
-    min-width: 90px;
+    min-width: 120px;
     margin: 0;
     font-weight: 500;
     color: #495057;
@@ -176,7 +176,8 @@ body {
 .timing-row select,
 .timing-row input[type="number"] {
     flex: 1;
-    max-width: 180px;
+    max-width: 200px;
+    min-width: 150px;
 }
 
 .encash-summary {
@@ -203,6 +204,30 @@ body {
 #encashed-amount-card h3,
 #encashed-amount-card p {
     color: #4caf50 !important;
+}
+
+/* Tax card styling */
+#tax-card {
+    background: #ff572220 !important;
+    border-color: #ff5722 !important;
+    color: #ff5722 !important;
+}
+
+#tax-card h3,
+#tax-card p {
+    color: #ff5722 !important;
+}
+
+/* Inflation card styling */
+#inflation-card {
+    background: #9c27b020 !important;
+    border-color: #9c27b0 !important;
+    color: #9c27b0 !important;
+}
+
+#inflation-card h3,
+#inflation-card p {
+    color: #9c27b0 !important;
 }
 
 /* Contribution Schedule Layout */
@@ -989,4 +1014,10 @@ tr.expanded {
 /* Contribution increase frequency styling */
 #contribution-increase-frequency {
     min-width: 120px;
+}
+
+/* Tax and inflation section styling */
+#tax-rate,
+#inflation-rate {
+    text-align: center;
 }
