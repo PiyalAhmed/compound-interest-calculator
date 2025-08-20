@@ -191,7 +191,15 @@ function calculate() {
         }
         
         // Calculate true ending balance including all accumulated interest
-        const trueEndingBalance = currentBalance + (reinvestInterest ? interestBucket : totalEncashedInterest);
+        // For encash mode, we need to show the current balance plus any interest that would be encashed
+        let trueEndingBalance;
+        if (reinvestInterest) {
+            trueEndingBalance = currentBalance + interestBucket;
+        } else {
+            // In encash mode, the ending balance is just the current balance
+            // The interest is accumulated separately and will be shown in the final results
+            trueEndingBalance = currentBalance;
+        }
         
         monthlyBreakdownData[yearForMonthlyData].push({
             month: month,
@@ -207,7 +215,15 @@ function calculate() {
             const row = document.createElement('tr');
             row.setAttribute('data-year', year);
 
-            const endingBalanceForTable = currentBalance + (reinvestInterest ? interestBucket : totalEncashedInterest);
+            // Calculate ending balance for the table
+            let endingBalanceForTable;
+            if (reinvestInterest) {
+                endingBalanceForTable = currentBalance + interestBucket;
+            } else {
+                // In encash mode, show the current balance (principal + contributions)
+                // The total encashed interest is shown separately in the final results
+                endingBalanceForTable = currentBalance;
+            }
 
             row.innerHTML = `
                 <td>${year}</td>
@@ -245,7 +261,26 @@ function calculate() {
 
     // --- 4. DISPLAY RESULTS ---
     const totalInvested = principal + totalContributions;
-    const finalBalance = currentBalance + totalEncashedInterest;
+    
+    // Calculate final balance based on interest strategy
+    let finalBalance;
+    if (reinvestInterest) {
+        finalBalance = currentBalance + interestBucket;
+    } else {
+        // In encash mode, the final balance is just the current balance (principal + contributions)
+        // The total encashed interest is shown separately
+        finalBalance = currentBalance;
+    }
+
+    // Debug logging for encash mode
+    if (!reinvestInterest) {
+        console.log('Encash Mode Debug:');
+        console.log('Principal:', principal);
+        console.log('Total Contributions:', totalContributions);
+        console.log('Current Balance (Principal + Contributions):', currentBalance);
+        console.log('Total Interest Earned (Encashed):', totalInterestEarned);
+        console.log('Final Balance (Principal + Contributions):', finalBalance);
+    }
 
     document.getElementById('total-balance').textContent = formatMoney(finalBalance);
     document.getElementById('total-invested').textContent = formatMoney(totalInvested);
