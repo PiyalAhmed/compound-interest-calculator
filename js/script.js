@@ -43,22 +43,32 @@ function calculate() {
 
     // --- 3. CALCULATION LOOP (MONTH BY MONTH) ---
     for (let month = 1; month <= totalMonths; month++) {
-        const interestThisPeriod = (month % monthsPerCompoundingPeriod === 0)
-            ? (reinvestInterest ? currentBalance : principal) * (annualInterestRate / compoundingPeriodsPerYear)
-            : 0;
-
+        // 3a. Add monthly contribution
         currentBalance += currentMonthlyContribution;
-        if (reinvestInterest) {
-            currentBalance += interestThisPeriod;
-        } else {
-            totalEncashedInterest += interestThisPeriod;
+        totalContributions += currentMonthlyContribution;
+        yearlyData.contribution += currentMonthlyContribution;
+
+        // 3b. Check for interest period and calculate interest
+        let interestThisPeriod = 0;
+        if (month % monthsPerCompoundingPeriod === 0) {
+            // THE FIX: Always calculate interest on the current balance.
+            interestThisPeriod = currentBalance * (annualInterestRate / compoundingPeriodsPerYear);
+
+            totalInterestEarned += interestThisPeriod;
+            yearlyData.interest += interestThisPeriod;
+
+            if (reinvestInterest) {
+                currentBalance += interestThisPeriod;
+            } else {
+                // If not reinvesting, the interest is "encashed".
+                // It does not get added to currentBalance for future compounding.
+                // We subtract it from the balance that includes contributions for this period
+                // to get the base for the next period, but we track it for the final total.
+                totalEncashedInterest += interestThisPeriod;
+            }
         }
 
-        totalContributions += currentMonthlyContribution;
-        totalInterestEarned += interestThisPeriod;
-        yearlyData.contribution += currentMonthlyContribution;
-        yearlyData.interest += interestThisPeriod;
-
+        // 3c. Store monthly data for expandable rows
         const yearForMonthlyData = Math.ceil(month / 12);
         if (!monthlyBreakdownData[yearForMonthlyData]) {
             monthlyBreakdownData[yearForMonthlyData] = [];
@@ -67,23 +77,27 @@ function calculate() {
             month: month,
             contribution: currentMonthlyContribution,
             interest: interestThisPeriod,
-            endingBalance: currentBalance
+            endingBalance: reinvestInterest ? currentBalance : currentBalance + totalEncashedInterest
         });
 
+        // 3d. Check for end of year
         if (month % 12 === 0) {
             const year = month / 12;
             const row = document.createElement('tr');
             row.setAttribute('data-year', year);
+
+            const endingBalanceForTable = reinvestInterest ? currentBalance : currentBalance;
+
             row.innerHTML = `
                 <td>${year}</td>
                 <td>${yearlyData.startingBalance.toFixed(2)}</td>
                 <td>${yearlyData.interest.toFixed(2)}</td>
                 <td>${yearlyData.contribution.toFixed(2)}</td>
-                <td>${currentBalance.toFixed(2)}</td>
+                <td>${endingBalanceForTable.toFixed(2)}</td>
             `;
             breakdownBody.appendChild(row);
 
-            yearlyData.startingBalance = currentBalance;
+            yearlyData.startingBalance = endingBalanceForTable;
             yearlyData.interest = 0;
             yearlyData.contribution = 0;
             currentMonthlyContribution *= (1 + contributionIncreasePercent);
@@ -151,9 +165,16 @@ function addTableExpandListener(monthlyData) {
             const monthlyRow = document.createElement('tr');
             monthlyRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
 
-            const startOfMonthBalance = (index === 0)
-                ? lastMonthBalance
-                : yearData[index - 1].endingBalance - yearData[index - 1].contribution - (data.interest > 0 ? yearData[index-1].interest : 0) ;
+            let startOfMonthBalance = 0;
+            if (index === 0) {
+                startOfMonthBalance = lastMonthBalance;
+            } else {
+                const prevMonthData = yearData[index - 1];
+                startOfMonthBalance = prevMonthData.endingBalance;
+                if (!reinvestInterest) {
+                    startOfMonthBalance -= prevMonthData.interest;
+                }
+            }
 
             monthlyRow.innerHTML = `
                 <td>${data.month}</td>
