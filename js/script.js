@@ -21,11 +21,13 @@ function calculate() {
     // --- 2. INITIALIZE VARIABLES ---
     const totalMonths = years * 12;
     const monthsPerCompoundingPeriod = 12 / compoundingPeriodsPerYear;
+    const monthlyInterestRate = annualInterestRate / 12;
 
     let currentBalance = principal;
     let totalInterestEarned = 0;
     let totalContributions = 0;
     let totalEncashedInterest = 0;
+    let interestBucket = 0; // Holds accrued interest before compounding
     let currentMonthlyContribution = monthlyContribution;
 
     const breakdownBody = document.getElementById('breakdown-body');
@@ -43,44 +45,39 @@ function calculate() {
 
     // --- 3. CALCULATION LOOP (MONTH BY MONTH) ---
     for (let month = 1; month <= totalMonths; month++) {
-        // 3a. Add monthly contribution
+        // 3a. Calculate this month's interest on the current balance and add to bucket
+        const interestThisMonth = currentBalance * monthlyInterestRate;
+        interestBucket += interestThisMonth;
+        totalInterestEarned += interestThisMonth;
+        yearlyData.interest += interestThisMonth;
+
+        // 3b. Add monthly contribution
         currentBalance += currentMonthlyContribution;
         totalContributions += currentMonthlyContribution;
         yearlyData.contribution += currentMonthlyContribution;
 
-        // 3b. Check for interest period and calculate interest
-        let interestThisPeriod = 0;
+        // 3c. Check if it's the end of a compounding period
         if (month % monthsPerCompoundingPeriod === 0) {
-            // THE FIX: Always calculate interest on the current balance.
-            interestThisPeriod = currentBalance * (annualInterestRate / compoundingPeriodsPerYear);
-
-            totalInterestEarned += interestThisPeriod;
-            yearlyData.interest += interestThisPeriod;
-
             if (reinvestInterest) {
-                currentBalance += interestThisPeriod;
+                currentBalance += interestBucket; // Compound the accrued interest
             } else {
-                // If not reinvesting, the interest is "encashed".
-                // It does not get added to currentBalance for future compounding.
-                // We subtract it from the balance that includes contributions for this period
-                // to get the base for the next period, but we track it for the final total.
-                totalEncashedInterest += interestThisPeriod;
+                totalEncashedInterest += interestBucket; // Move accrued interest to encashed total
             }
+            interestBucket = 0; // Reset the bucket
         }
 
-        // 3c. Store monthly data for expandable rows
-        const yearForMonthlyData = Math.ceil(month / 12);
-        if (!monthlyBreakdownData[yearForMonthlyData]) {
-            monthlyBreakdownData[yearForMonthlyData] = [];
+        // 3d. Store monthly data
+        if (!monthlyBreakdownData[Math.ceil(month / 12)]) {
+            monthlyBreakdownData[Math.ceil(month / 12)] = [];
         }
-        monthlyBreakdownData[yearForMonthlyData].push({
+        monthlyBreakdownData[Math.ceil(month / 12)].push({
             month: month,
             contribution: currentMonthlyContribution,
-            interest: interestThisPeriod,
+            interest: interestThisMonth,
             endingBalance: reinvestInterest ? currentBalance : currentBalance + totalEncashedInterest
         });
 
-        // 3d. Check for end of year
+        // 3e. Check for end of year to update table and chart data
         if (month % 12 === 0) {
             const year = month / 12;
             const row = document.createElement('tr');
