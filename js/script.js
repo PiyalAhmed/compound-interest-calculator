@@ -45,8 +45,11 @@ function calculate() {
 
     // --- 3. CALCULATION LOOP (MONTH BY MONTH) ---
     for (let month = 1; month <= totalMonths; month++) {
-        // 3a. Calculate this month's interest on the current balance and add to bucket
-        const interestThisMonth = currentBalance * monthlyInterestRate;
+        // 3a. Calculate this month's interest on current balance AND accumulated interest bucket
+        // This ensures interest compounds properly even before compounding periods
+        const baseForInterest = currentBalance + (reinvestInterest ? interestBucket : 0);
+        const interestThisMonth = baseForInterest * monthlyInterestRate;
+        
         interestBucket += interestThisMonth;
         totalInterestEarned += interestThisMonth;
         yearlyData.interest += interestThisMonth;
@@ -66,15 +69,21 @@ function calculate() {
             interestBucket = 0; // Reset the bucket
         }
 
-        // 3d. Store monthly data
-        if (!monthlyBreakdownData[Math.ceil(month / 12)]) {
-            monthlyBreakdownData[Math.ceil(month / 12)] = [];
+        // 3d. Store monthly data with proper balance calculations
+        const yearForMonthlyData = Math.ceil(month / 12);
+        if (!monthlyBreakdownData[yearForMonthlyData]) {
+            monthlyBreakdownData[yearForMonthlyData] = [];
         }
-        monthlyBreakdownData[Math.ceil(month / 12)].push({
+        
+        // Calculate true ending balance including all accumulated interest
+        const trueEndingBalance = currentBalance + (reinvestInterest ? interestBucket : totalEncashedInterest);
+        
+        monthlyBreakdownData[yearForMonthlyData].push({
             month: month,
             contribution: currentMonthlyContribution,
             interest: interestThisMonth,
-            endingBalance: reinvestInterest ? currentBalance : currentBalance + totalEncashedInterest
+            endingBalance: trueEndingBalance,
+            startingBalance: null // Will be calculated later for display
         });
 
         // 3e. Check for end of year to update table and chart data
@@ -83,7 +92,7 @@ function calculate() {
             const row = document.createElement('tr');
             row.setAttribute('data-year', year);
 
-            const endingBalanceForTable = reinvestInterest ? currentBalance : currentBalance;
+            const endingBalanceForTable = currentBalance + (reinvestInterest ? interestBucket : totalEncashedInterest);
 
             row.innerHTML = `
                 <td>${year}</td>
@@ -100,15 +109,26 @@ function calculate() {
             currentMonthlyContribution *= (1 + contributionIncreasePercent);
 
             chartLabels.push(`Year ${year}`);
-            balanceData.push(reinvestInterest ? currentBalance : currentBalance + totalEncashedInterest);
+            balanceData.push(endingBalanceForTable);
             totalContributionsData.push(totalContributions);
             totalInterestData.push(totalInterestEarned);
         }
     }
 
+    // --- 3f. HANDLE LEFTOVER INTEREST (Edge case fix) ---
+    // If there's remaining interest in the bucket at the end, process it
+    if (interestBucket > 0) {
+        if (reinvestInterest) {
+            currentBalance += interestBucket;
+        } else {
+            totalEncashedInterest += interestBucket;
+        }
+        interestBucket = 0;
+    }
+
     // --- 4. DISPLAY RESULTS ---
     const totalInvested = principal + totalContributions;
-    const finalBalance = reinvestInterest ? currentBalance : currentBalance + totalEncashedInterest;
+    const finalBalance = currentBalance + totalEncashedInterest;
 
     document.getElementById('total-balance').textContent = `$${finalBalance.toFixed(2)}`;
     document.getElementById('total-invested').textContent = `$${totalInvested.toFixed(2)}`;
@@ -124,19 +144,24 @@ function calculate() {
 
     document.getElementById('result').classList.remove('hidden');
     renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData);
-    addTableExpandListener(monthlyBreakdownData);
+    addTableExpandListener(monthlyBreakdownData, reinvestInterest);
 }
 
-function addTableExpandListener(monthlyData) {
+function addTableExpandListener(monthlyData, reinvestInterest) {
     const tableBody = document.getElementById('breakdown-body');
-    tableBody.addEventListener('click', function(event) {
+    
+    // Remove existing listeners to prevent duplicates
+    const newTableBody = tableBody.cloneNode(true);
+    tableBody.parentNode.replaceChild(newTableBody, tableBody);
+    
+    newTableBody.addEventListener('click', function(event) {
         const row = event.target.closest('tr[data-year]');
         if (!row) return;
 
         const year = row.dataset.year;
         const yearData = monthlyData[year];
 
-        const existingMonthlyRows = tableBody.querySelectorAll(`.monthly-row-for-year-${year}`);
+        const existingMonthlyRows = newTableBody.querySelectorAll(`.monthly-row-for-year-${year}`);
         if (existingMonthlyRows.length > 0) {
             existingMonthlyRows.forEach(r => r.remove());
             row.classList.remove('expanded');
@@ -145,7 +170,6 @@ function addTableExpandListener(monthlyData) {
 
         row.classList.add('expanded');
         const fragment = document.createDocumentFragment();
-        let lastMonthBalance = parseFloat(row.cells[1].innerText.replace(/,/g, ''));
 
         const headerRow = document.createElement('tr');
         headerRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
@@ -158,18 +182,26 @@ function addTableExpandListener(monthlyData) {
         `;
         fragment.appendChild(headerRow);
 
+        // Calculate proper starting balances for each month
+        let runningStartBalance = parseFloat(row.cells[1].innerText.replace(/,/g, ''));
+        
         yearData.forEach((data, index) => {
             const monthlyRow = document.createElement('tr');
             monthlyRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
 
-            let startOfMonthBalance = 0;
+            // For first month of year, use the year's starting balance
+            // For subsequent months, calculate based on previous month's ending
+            let startOfMonthBalance;
             if (index === 0) {
-                startOfMonthBalance = lastMonthBalance;
+                startOfMonthBalance = runningStartBalance;
             } else {
                 const prevMonthData = yearData[index - 1];
-                startOfMonthBalance = prevMonthData.endingBalance;
+                startOfMonthBalance = prevMonthData.endingBalance - prevMonthData.contribution - prevMonthData.interest;
+                
+                // Adjust for interest treatment
                 if (!reinvestInterest) {
-                    startOfMonthBalance -= prevMonthData.interest;
+                    // If not reinvesting, the interest doesn't affect the starting balance for next month
+                    startOfMonthBalance += prevMonthData.interest;
                 }
             }
 
