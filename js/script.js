@@ -22,30 +22,40 @@ function calculate() {
     let currentBalance = principal;
     let totalInterestEarned = 0;
     let totalContributions = 0;
+    let totalEncashedInterest = 0;
+    let totalCompoundedInterest = 0;
     let currentMonthlyContribution = monthlyContribution;
 
     const breakdownBody = document.getElementById('breakdown-body');
-    breakdownBody.innerHTML = ''; // Clear previous results
+    breakdownBody.innerHTML = '';
+
+    const encashedInterestP = document.getElementById('encashed-interest-p');
+    const compoundedInterestP = document.getElementById('compounded-interest-p');
+    encashedInterestP.classList.add('hidden');
+    compoundedInterestP.classList.add('hidden');
 
     let yearlyInterest = 0;
     let yearlyContribution = 0;
     let yearStartingBalance = principal;
 
     for (let month = 1; month <= totalMonths; month++) {
-        // Calculate interest for the current month
         const interestThisMonth = (reinvestInterest ? currentBalance : principal) * monthlyInterestRate;
-        currentBalance += interestThisMonth;
         totalInterestEarned += interestThisMonth;
         yearlyInterest += interestThisMonth;
 
-        // Add monthly contribution
+        if (reinvestInterest) {
+            currentBalance += interestThisMonth;
+            totalCompoundedInterest += interestThisMonth;
+        } else {
+            totalEncashedInterest += interestThisMonth;
+        }
+
         if (currentMonthlyContribution > 0) {
             currentBalance += currentMonthlyContribution;
             totalContributions += currentMonthlyContribution;
             yearlyContribution += currentMonthlyContribution;
         }
 
-        // At the end of each year, update the breakdown table and increase the contribution
         if (month % 12 === 0) {
             const year = month / 12;
             const row = document.createElement('tr');
@@ -58,20 +68,28 @@ function calculate() {
             `;
             breakdownBody.appendChild(row);
 
-            // Reset for next year
             yearStartingBalance = currentBalance;
             yearlyInterest = 0;
             yearlyContribution = 0;
 
-            // Increase the monthly contribution for the next year
             currentMonthlyContribution *= (1 + contributionIncreasePercent);
         }
     }
 
     const totalInvested = principal + totalContributions;
+    const finalBalance = currentBalance;
 
-    document.getElementById('total-balance').textContent = `$${currentBalance.toFixed(2)}`;
+    document.getElementById('total-balance').textContent = `$${finalBalance.toFixed(2)}`;
     document.getElementById('total-invested').textContent = `$${totalInvested.toFixed(2)}`;
     document.getElementById('total-interest').textContent = `$${totalInterestEarned.toFixed(2)}`;
+
+    if (reinvestInterest) {
+        document.getElementById('compounded-interest').textContent = `$${totalCompoundedInterest.toFixed(2)}`;
+        compoundedInterestP.classList.remove('hidden');
+    } else {
+        document.getElementById('encashed-interest').textContent = `$${totalEncashedInterest.toFixed(2)}`;
+        encashedInterestP.classList.remove('hidden');
+    }
+
     document.getElementById('result').classList.remove('hidden');
 }
