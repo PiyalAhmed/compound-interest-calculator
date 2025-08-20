@@ -15,8 +15,17 @@
                 <input type="number" id="principal" value="10000" required>
             </div>
             <div class="form-group">
-                <label for="interest-rate">Annual Interest Rate (%):</label>
+                <label for="interest-rate">Interest Rate (% Annum):</label>
                 <input type="number" id="interest-rate" value="5" required>
+            </div>
+            <div class="form-group">
+                <label for="compound-period">Compounding Period:</label>
+                <select id="compound-period">
+                    <option value="12" selected>Monthly</option>
+                    <option value="4">Quarterly</option>
+                    <option value="2">Half-Yearly</option>
+                    <option value="1">Yearly</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="years">Investment Period (Years):</label>
