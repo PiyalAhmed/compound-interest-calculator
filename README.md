@@ -5,7 +5,8 @@ A simple web-based compound interest calculator built with HTML, CSS, and JavaSc
 ## Features
 
 -   **Initial Principal Amount**: The initial amount of money you invest.
--   **Annual Interest Rate**: The annual percentage at which your investment grows. Interest is compounded monthly.
+-   **Interest Rate (% Annum)**: The annual percentage at which your investment grows.
+-   **Compounding Period**: How often the interest is calculated and added to the balance (Monthly, Quarterly, Half-Yearly, Yearly).
 -   **Investment Period**: The number of years you plan to keep your money invested.
 -   **Monthly Contribution**: A fixed amount you contribute to your investment each month.
 -   **Annual Increase in Monthly Contribution**: The percentage by which your monthly contribution increases each year.
@@ -20,7 +21,8 @@ A simple web-based compound interest calculator built with HTML, CSS, and JavaSc
 1.  Open the `index.html` file in your web browser.
 2.  Fill in the input fields:
     -   Principal Amount ($)
-    -   Annual Interest Rate (%)
+    -   Interest Rate (% Annum)
+    -   Compounding Period
     -   Investment Period (Years)
     -   Monthly Contribution ($)
     -   Annual Increase in Monthly Contribution (%)

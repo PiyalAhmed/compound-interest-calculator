@@ -33,11 +33,13 @@ h1 {
 }
 
 .form-group input[type="number"],
-.form-group input[type="checkbox"] {
-    width: calc(100% - 22px);
+.form-group input[type="checkbox"],
+.form-group select {
+    width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 
 .form-group input[type="checkbox"] {
