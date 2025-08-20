@@ -1,140 +1,487 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+/* Modern CSS Reset */
+* {
     margin: 0;
-    padding: 20px;
-    min-height: 100vh;
+    padding: 0;
     box-sizing: border-box;
 }
 
-.container {
-    display: flex;
-    gap: 20px;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.5;
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
 }
 
-.calculator-inputs, .calculator-results {
-    background: #fff;
+.container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    min-height: calc(100vh - 40px);
+    overflow: hidden; /* Prevent container scroll */
+}
+
+/* Calculator Inputs Section - Left Panel */
+.calculator-inputs {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Calculator Results Section - Right Panel */
+.calculator-results {
+    height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Hide Scrollbars */
+.calculator-inputs::-webkit-scrollbar,
+.calculator-results::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
 }
 
 .calculator-inputs {
-    flex: 1;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
 .calculator-results {
-    flex: 2;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
-h1 {
+.calculator-inputs h1 {
     text-align: center;
-    color: #333;
+    color: #1a1a1a;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
 }
 
+/* Form Groups - Compact */
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    color: #555;
+    margin-bottom: 6px;
+    color: #495057;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .form-group input[type="number"],
 .form-group input[type="checkbox"],
 .form-group select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #333;
+}
+
+.form-group input[type="number"]:focus,
+.form-group input[type="checkbox"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007AFF;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1);
 }
 
 .form-group input[type="checkbox"] {
     width: auto;
+    margin-right: 8px;
+    transform: scale(1.1);
 }
 
+/* Contribution Schedule Layout */
+.contribution-schedule {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.schedule-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+}
+
+.schedule-row:last-child {
+    margin-bottom: 0;
+}
+
+.schedule-label {
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+    min-width: 120px;
+    text-align: right;
+}
+
+.radio-options {
+    display: flex;
+    gap: 16px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.radio-option input[type="radio"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.1);
+}
+
+.radio-option label {
+    margin: 0;
+    font-weight: 400;
+    color: #666;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.85rem;
+}
+
+/* Button - Modern Design */
 button {
     width: 100%;
-    padding: 10px;
-    background-color: #007bff;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #007AFF, #0056CC);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 16px;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+    position: relative;
+    overflow: hidden;
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
+    background: linear-gradient(135deg, #0056CC, #004499);
 }
 
-#result {
-    margin-top: 20px;
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
 }
 
-.hidden {
-    display: none;
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
 }
 
+button:hover::before {
+    left: 100%;
+}
+
+/* Calculator Results Section - Right Panel */
+.calculator-results {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.calculator-results h2 {
+    color: #1a1a1a;
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Chart Container */
+#chart-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 24px;
+    height: 500px;
+    position: relative;
+}
+
+#chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Results Summary - Compact Cards with Colors Matching Chart */
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.result-card {
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    /* Default colors that will be overridden by JavaScript */
+    background: rgba(108, 117, 125, 0.125); /* Low opacity gray background */
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.result-card h3 {
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.result-card p {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Card colors are now set dynamically via JavaScript to match chart colors */
+
+/* Stats Section */
 #stats {
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    background-color: #f9f9f9;
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    border: 1px solid #e9ecef;
 }
 
 #stats p {
-    margin: 5px 0;
+    margin: 6px 0;
+    color: #666;
+    font-weight: 400;
+    font-size: 0.9rem;
 }
 
+/* Table Container */
+.table-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.table-container h3 {
+    color: #1a1a1a;
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Monthly details hint styling */
+.monthly-hint {
+    text-align: center;
+    color: #007AFF;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #007AFF;
+}
+
+/* Table Styles - Compact */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 16px;
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    font-size: 0.9rem;
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px 8px;
     text-align: left;
+    border-bottom: 1px solid #e9ecef;
 }
 
 th {
-    background-color: #f2f2f2;
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+td {
+    color: #333;
+    font-weight: 400;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
 }
 
 tr[data-year] {
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 tr[data-year]:hover {
-    background-color: #f5f5f5;
+    background-color: #e3f2fd;
 }
 
 tr.expanded {
-    background-color: #e9e9e9;
+    background-color: #e8f5e8;
 }
 
 .monthly-row th {
-    background-color: #fafafa;
+    background: #f8f9fa;
+    color: #666;
     font-style: italic;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 .monthly-row td {
-    background-color: #fafafa;
-    padding-left: 30px;
+    background: #fafafa;
+    padding-left: 24px;
+    font-size: 0.8rem;
+    color: #666;
 }
 
+/* Utility Classes */
+.hidden {
+    display: none;
+}
 
-@media (max-width: 600px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
     .container {
-        padding: 15px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .calculator-inputs {
+        position: static;
+        order: 2;
+    }
+    
+    .calculator-results {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+    
+    .calculator-inputs,
+    .calculator-results {
+        padding: 20px;
+    }
+    
+    .calculator-inputs h1 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+    
+    .results-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .schedule-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .schedule-label {
+        margin-right: 0;
+        margin-bottom: 4px;
+    }
+    
+    .form-group {
+        margin-bottom: 14px;
+    }
+    
+    .form-group input[type="number"],
+    .form-group input[type="checkbox"],
+    .form-group select {
+        padding: 10px;
+    }
+    
+    button {
+        padding: 12px;
+    }
+    
+    th, td {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calculator-inputs,
+    .calculator-results {
+        padding: 16px;
+    }
+    
+    .calculator-inputs h1 {
+        font-size: 1.4rem;
+    }
+    
+    .monthly-row td {
+        padding-left: 16px;
     }
 }

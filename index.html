@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compound Interest Calculator</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -13,70 +13,143 @@
             <h1>Compound Interest Calculator</h1>
             <form id="calculator-form">
                 <div class="form-group">
-                    <label for="principal">Principal Amount ($):</label>
-                <input type="number" id="principal" value="10000" required>
-            </div>
-            <div class="form-group">
-                <label for="interest-rate">Interest Rate (% Annum):</label>
-                <input type="number" id="interest-rate" value="5" required>
-            </div>
-            <div class="form-group">
-                <label for="compound-period">Compounding Period:</label>
-                <select id="compound-period">
-                    <option value="12" selected>Monthly</option>
-                    <option value="4">Quarterly</option>
-                    <option value="2">Half-Yearly</option>
-                    <option value="1">Yearly</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="years">Investment Period (Years):</label>
-                <input type="number" id="years" value="10" required>
-            </div>
-            <div class="form-group">
-                <label for="reinvest-interest">Reinvest Interest:</label>
-                <input type="checkbox" id="reinvest-interest" checked>
-            </div>
-            <div class="form-group">
-                <label for="monthly-contribution">Monthly Contribution ($):</label>
-                <input type="number" id="monthly-contribution" value="100">
-            </div>
-            <div class="form-group">
-                <label for="contribution-increase">Annual Increase in Monthly Contribution (%):</label>
-                <input type="number" id="contribution-increase" value="0">
-            </div>
-            <button type="submit">Calculate</button>
+                    <label for="principal">Principal Amount ($)</label>
+                    <input type="number" id="principal" value="10000" min="0" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="interest-rate">Annual Interest Rate (%)</label>
+                    <input type="number" id="interest-rate" value="5" min="0" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="compound-period">Compounding Frequency</label>
+                    <select id="compound-period">
+                        <option value="12" selected>Monthly</option>
+                        <option value="4">Quarterly</option>
+                        <option value="2">Semi-Annually</option>
+                        <option value="1">Annually</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="years">Investment Period (Years)</label>
+                    <input type="number" id="years" value="10" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Interest Strategy</label>
+                    <div class="contribution-schedule">
+                        <div class="schedule-row">
+                            <span class="schedule-label">Interest handling</span>
+                            <div class="radio-options">
+                                <div class="radio-option">
+                                    <input type="radio" id="reinvest-interest" name="interest-strategy" value="reinvest" checked>
+                                    <label for="reinvest-interest">Reinvest the interests back</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="encash-interest" name="interest-strategy" value="encash">
+                                    <label for="encash-interest">Encash the interests</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="additional-contribution">Additional Contribution ($)</label>
+                    <input type="number" id="additional-contribution" value="100" min="0" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label>Contribution Schedule</label>
+                    <div class="contribution-schedule">
+                        <div class="schedule-row">
+                            <span class="schedule-label">Contribute at the</span>
+                            <div class="radio-options">
+                                <div class="radio-option">
+                                    <input type="radio" id="timing-start" name="contribution-timing" value="start" checked>
+                                    <label for="timing-start">beginning</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="timing-end" name="contribution-timing" value="end">
+                                    <label for="timing-end">end</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="schedule-row">
+                            <span class="schedule-label">of each</span>
+                            <div class="radio-options">
+                                <div class="radio-option">
+                                    <input type="radio" id="frequency-month" name="contribution-frequency" value="month" checked>
+                                    <label for="frequency-month">month</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="frequency-year" name="contribution-frequency" value="year">
+                                    <label for="frequency-year">year</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contribution-increase">Annual Increase (%)</label>
+                    <input type="number" id="contribution-increase" value="0" min="0" step="0.01">
+                </div>
+                
+                <button type="submit">Calculate</button>
             </form>
         </div>
+        
         <div class="calculator-results">
             <div id="result" class="hidden">
-                <h2>Results</h2>
-                <div id="chart-container" style="width: 100%; margin-bottom: 20px;">
+                <h2>Investment Results</h2>
+                
+                <div id="chart-container">
                     <canvas id="investment-chart"></canvas>
                 </div>
-                <p><strong>Final Balance: <span id="total-balance"></span></strong></p>
-            <div id="stats">
-                <p>Total Contributions Made: <span id="total-invested"></span></p>
-                <p>Total Interest Earned: <span id="total-interest"></span></p>
-                <p id="compounded-interest-p" class="hidden">Compounded Interest: <span id="compounded-interest"></span></p>
-                <p id="encashed-interest-p" class="hidden">Total Encashed Interest: <span id="encashed-interest"></span></p>
-            </div>
-            <table id="breakdown-table">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>Starting Balance</th>
-                        <th>Interest Earned</th>
-                        <th>Annual Contribution</th>
-                        <th>Ending Balance</th>
-                    </tr>
-                </thead>
-                <tbody id="breakdown-body">
-                </tbody>
-            </table>
+                
+                <div class="results-summary">
+                    <div class="result-card">
+                        <h3>Final Balance</h3>
+                        <p id="total-balance">$0.00</p>
+                    </div>
+                    <div class="result-card">
+                        <h3>Total Invested</h3>
+                        <p id="total-invested">$0.00</p>
+                    </div>
+                    <div class="result-card">
+                        <h3>Interest Earned</h3>
+                        <p id="total-interest">$0.00</p>
+                    </div>
+                </div>
+                
+                <div id="stats" class="hidden">
+                    <p id="encashed-interest-p" class="hidden">Total Encashed Interest: <span id="encashed-interest"></span></p>
+                </div>
+                
+                <div class="table-container">
+                    <h3>Yearly Breakdown</h3>
+                    <p class="monthly-hint">Click on any year to see monthly details</p>
+                    <table id="breakdown-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Starting Balance</th>
+                                <th>Interest Earned</th>
+                                <th>Contributions</th>
+                                <th>Ending Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakdown-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+    
     <script src="js/script.js"></script>
 </body>
 </html>

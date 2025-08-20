@@ -1,38 +1,76 @@
 # Compound Interest Calculator
 
-A simple web-based compound interest calculator built with HTML, CSS, and JavaScript. This tool helps you visualize the growth of your investment over time with monthly contributions and compounding.
+A modern, feature-rich compound interest calculator built with HTML, CSS, and JavaScript. Perfect for financial planning and investment analysis.
 
 ## Features
 
--   **Initial Principal Amount**: The initial amount of money you invest.
--   **Interest Rate (% Annum)**: The annual percentage at which your investment grows.
--   **Compounding Period**: How often the interest is calculated and added to the balance (Monthly, Quarterly, Half-Yearly, Yearly).
--   **Investment Period**: The number of years you plan to keep your money invested.
--   **Monthly Contribution**: A fixed amount you contribute to your investment each month.
--   **Annual Increase in Monthly Contribution**: The percentage by which your monthly contribution increases each year.
--   **Reinvest Interest**: A checkbox to choose between compound interest (checked) and simple interest (unchecked).
-    -   **Compound Interest**: Interest is earned on the current balance and is reinvested.
-    -   **Simple Interest**: Interest is earned only on the initial principal amount. This interest is not reinvested and is tracked separately as "Total Encashed Interest".
--   **Chart Visualization**: A line chart that visually represents the growth of the total balance, total contributions, and total interest over the investment period.
--   **Expandable Yearly Breakdown**: The year-by-year results table is now interactive. Click on any year's row to see a detailed monthly breakdown for that year.
--   **Summary Statistics**: A detailed summary including the final balance, total contributions, total interest earned, and a breakdown of whether that interest was compounded or "encashed" (for simple interest).
+### Core Functionality
+- **Principal Amount**: Set your initial investment amount
+- **Interest Rate**: Annual interest rate with decimal precision
+- **Compounding Periods**: Choose from Monthly, Quarterly, Half-Yearly, or Yearly compounding
+- **Investment Period**: Specify the number of years for your investment
+- **Interest Reinvestment**: Toggle whether to reinvest or cash out interest
 
-## How to Use
+### Advanced Contribution Options
+- **Additional Contributions**: Add regular contributions to boost your investment
+- **Contribution Timing**: Choose when contributions are made:
+  - **Start** or **End** of each period
+  - **Monthly** or **Yearly** frequency
+- **Annual Increase**: Set percentage increase in contributions each year
 
-1.  Open the `index.html` file in your web browser.
-2.  Fill in the input fields:
-    -   Principal Amount ($)
-    -   Interest Rate (% Annum)
-    -   Compounding Period
-    -   Investment Period (Years)
-    -   Monthly Contribution ($)
-    -   Annual Increase in Monthly Contribution (%)
-3.  Check or uncheck the "Reinvest Interest" box based on your preference.
-4.  Click the "Calculate" button.
-5.  The summary statistics and a detailed year-by-year breakdown will be displayed below.
+### Results & Analysis
+- **Interactive Chart**: Visual representation of investment growth over time
+- **Detailed Breakdown**: Year-by-year analysis with expandable monthly details
+- **Summary Statistics**: Total balance, contributions, and interest earned
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-## Project Structure
+## How It Works
 
--   `index.html`: The main HTML file containing the structure of the calculator.
--   `css/style.css`: The stylesheet for styling the application.
--   `js/script.js`: The JavaScript file containing the calculation logic and DOM manipulation.
+The calculator uses advanced financial algorithms to:
+1. Calculate compound interest based on your selected compounding frequency
+2. Apply contributions according to your timing preferences
+3. Handle interest reinvestment or cash-out scenarios
+4. Account for annual contribution increases
+5. Provide detailed monthly and yearly breakdowns
+
+## Usage
+
+1. Enter your initial investment amount
+2. Set the annual interest rate
+3. Choose your preferred compounding frequency
+4. Specify the investment period in years
+5. Decide whether to reinvest interest
+6. Set additional contribution amount and timing preferences
+7. Optionally set annual contribution increases
+8. Click "Calculate" to see results
+
+## Technical Details
+
+- **Frontend**: Pure HTML5, CSS3, and vanilla JavaScript
+- **Charts**: Chart.js for data visualization
+- **Responsive**: Mobile-first design with CSS Grid and Flexbox
+- **Performance**: Optimized calculations with efficient algorithms
+- **Accessibility**: Semantic HTML and keyboard navigation support
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Deployment
+
+This calculator is designed to work on GitHub Pages and other static hosting platforms. Simply upload the files to your hosting service.
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Contributing
+
+Feel free to submit issues, feature requests, or pull requests to improve the calculator.
+
+---
+
+*Built with ❤️ for financial education and planning*
