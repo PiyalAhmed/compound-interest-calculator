@@ -40,6 +40,60 @@ function formatNumber(num) {
 document.addEventListener('DOMContentLoaded', function() {
     // Calculate with default values on page load
     calculate();
+    
+    // Add event listeners for interest strategy changes
+    const interestStrategySelect = document.getElementById('interest-strategy-select');
+    const encashTimingOptions = document.getElementById('encash-timing-options');
+    
+    interestStrategySelect.addEventListener('change', function() {
+        if (this.value === 'encash') {
+            encashTimingOptions.classList.remove('hidden');
+        } else {
+            encashTimingOptions.classList.add('hidden');
+        }
+    });
+    
+    // Add event listeners for encash period changes (month vs year)
+    const encashPeriodSelect = document.getElementById('encash-period-select');
+    const encashTimingSelect = document.getElementById('encash-timing-select');
+    const encashYearInput = document.getElementById('encash-year-input');
+    const encashMonthRow = document.getElementById('encash-month-row');
+    const encashMonthSelect = document.getElementById('encash-month-select');
+    const encashSummaryText = document.getElementById('encash-summary-text');
+    
+    function updateEncashSummary() {
+        const period = encashPeriodSelect.value;
+        const timing = encashTimingSelect.value;
+        const year = encashYearInput.value;
+        const month = encashMonthSelect.options[encashMonthSelect.selectedIndex].text;
+        
+        let summaryText = `Interest will compound until the ${timing} of `;
+        
+        if (period === 'month') {
+            summaryText += `${month} in year ${year}`;
+        } else {
+            summaryText += `year ${year}`;
+        }
+        
+        summaryText += ', then be encashed monthly.';
+        encashSummaryText.textContent = summaryText;
+    }
+    
+    encashPeriodSelect.addEventListener('change', function() {
+        if (this.value === 'month') {
+            encashMonthRow.classList.remove('hidden');
+        } else {
+            encashMonthRow.classList.add('hidden');
+        }
+        updateEncashSummary();
+    });
+    
+    encashTimingSelect.addEventListener('change', updateEncashSummary);
+    encashYearInput.addEventListener('input', updateEncashSummary);
+    encashMonthSelect.addEventListener('change', updateEncashSummary);
+    
+    // Initial summary update
+    updateEncashSummary();
 });
 
 document.getElementById('calculator-form').addEventListener('submit', function(event) {
@@ -52,14 +106,21 @@ function calculate() {
     const principal = parseFloat(document.getElementById('principal').value) || 0;
     const annualInterestRate = parseFloat(document.getElementById('interest-rate').value) / 100;
     const years = parseInt(document.getElementById('years').value);
-    const reinvestInterest = document.querySelector('input[name="interest-strategy"]:checked').value === 'reinvest';
+    const reinvestInterest = document.getElementById('interest-strategy-select').value === 'reinvest';
     const additionalContribution = parseFloat(document.getElementById('additional-contribution').value) || 0;
     const contributionIncreasePercent = (parseFloat(document.getElementById('contribution-increase').value) || 0) / 100;
+    const contributionIncreaseFrequency = parseInt(document.getElementById('contribution-increase-frequency').value) || 1;
     const compoundingPeriodsPerYear = parseInt(document.getElementById('compound-period').value);
     
     // New contribution timing options
-    const contributionTiming = document.querySelector('input[name="contribution-timing"]:checked').value;
-    const contributionFrequency = document.querySelector('input[name="contribution-frequency"]:checked').value;
+    const contributionTiming = document.getElementById('contribution-timing-select').value;
+    const contributionFrequency = document.getElementById('contribution-frequency-select').value;
+
+    // Encash timing options
+    const encashTiming = document.getElementById('encash-timing-select')?.value || 'start';
+    const encashPeriod = document.getElementById('encash-period-select')?.value || 'year';
+    const encashStartYear = parseInt(document.getElementById('encash-year-input')?.value) || 1;
+    const encashStartMonth = parseInt(document.getElementById('encash-month-select')?.value) || 1;
 
     if (isNaN(principal) || isNaN(annualInterestRate) || isNaN(years) || isNaN(additionalContribution) || isNaN(contributionIncreasePercent)) {
         alert("Please enter valid numbers in all fields.");
@@ -71,6 +132,25 @@ function calculate() {
     if (!validFrequencies.includes(compoundingPeriodsPerYear)) {
         alert("Please select a valid compounding frequency.");
         return;
+    }
+
+    // Validate encash start timing
+    if (!reinvestInterest) {
+        if (encashPeriod === 'year') {
+            if (encashStartYear < 1 || encashStartYear > years) {
+                alert(`Encash start year must be between 1 and ${years} (investment period).`);
+                return;
+            }
+        } else {
+            if (encashStartYear < 1 || encashStartYear > years) {
+                alert(`Encash start year must be between 1 and ${years} (investment period).`);
+                return;
+            }
+            if (encashStartMonth < 1 || encashStartMonth > 12) {
+                alert("Encash start month must be between 1 and 12.");
+                return;
+            }
+        }
     }
 
     // --- 2. INITIALIZE VARIABLES ---
@@ -94,6 +174,21 @@ function calculate() {
     let totalEncashedInterest = 0;
     let interestBucket = 0; // Holds accrued interest before compounding
     let currentAdditionalContribution = additionalContribution;
+    
+    // Function to calculate current contribution amount based on month and frequency
+    function getCurrentContributionAmount(month) {
+        if (contributionIncreasePercent === 0) return additionalContribution;
+        
+        // Calculate how many increase periods have passed
+        // The increase should apply AFTER each period, not during the same period
+        const monthsPerIncreasePeriod = 12 / contributionIncreaseFrequency;
+        const increasePeriodsPassed = Math.floor((month - 1) / monthsPerIncreasePeriod);
+        
+        if (increasePeriodsPassed > 0) {
+            return additionalContribution * Math.pow(1 + contributionIncreasePercent, increasePeriodsPassed);
+        }
+        return additionalContribution;
+    }
 
     const breakdownBody = document.getElementById('breakdown-body');
     breakdownBody.innerHTML = '';
@@ -104,6 +199,7 @@ function calculate() {
     const balanceData = [principal];
     const totalContributionsData = [0];
     const totalInterestData = [0];
+    const totalEncashedData = [0];
 
     // --- 3. CALCULATION LOOP (MONTH BY MONTH) ---
     for (let month = 1; month <= totalMonths; month++) {
@@ -115,7 +211,7 @@ function calculate() {
             // Monthly contribution
             if (contributionTiming === 'start') {
                 // Add contribution at start of month (before interest calculation)
-                contributionThisMonth = currentAdditionalContribution;
+                contributionThisMonth = getCurrentContributionAmount(month);
                 currentBalance += contributionThisMonth;
                 totalContributions += contributionThisMonth;
                 yearlyData.contribution += contributionThisMonth;
@@ -125,7 +221,7 @@ function calculate() {
             // Yearly contribution
             if (month % 12 === 1 && contributionTiming === 'start') {
                 // Add yearly contribution at start of year
-                contributionThisMonth = currentAdditionalContribution * 12;
+                contributionThisMonth = getCurrentContributionAmount(month) * 12;
                 currentBalance += contributionThisMonth;
                 totalContributions += contributionThisMonth;
                 yearlyData.contribution += contributionThisMonth;
@@ -158,7 +254,7 @@ function calculate() {
             // Monthly contribution
             if (contributionTiming === 'end') {
                 // Add contribution at end of month (after interest calculation)
-                contributionThisMonth = currentAdditionalContribution;
+                contributionThisMonth = getCurrentContributionAmount(month);
                 currentBalance += contributionThisMonth;
                 totalContributions += contributionThisMonth;
                 yearlyData.contribution += contributionThisMonth;
@@ -167,7 +263,7 @@ function calculate() {
             // Yearly contribution
             if (month % 12 === 0 && contributionTiming === 'end') {
                 // Add yearly contribution at end of year
-                contributionThisMonth = currentAdditionalContribution * 12;
+                contributionThisMonth = getCurrentContributionAmount(month) * 12;
                 currentBalance += contributionThisMonth;
                 totalContributions += contributionThisMonth;
                 yearlyData.contribution += contributionThisMonth;
@@ -179,7 +275,35 @@ function calculate() {
             if (reinvestInterest) {
                 currentBalance += interestBucket; // Compound the accrued interest
             } else {
-                totalEncashedInterest += interestBucket; // Move accrued interest to encashed total
+                // Check if we should start encashing interest based on timing
+                const currentYear = Math.ceil(month / 12);
+                let shouldEncash = false;
+                
+                if (encashPeriod === 'year') {
+                    if (encashTiming === 'start') {
+                        // Start encashing from the beginning of the specified year
+                        shouldEncash = currentYear >= encashStartYear;
+                    } else {
+                        // Start encashing from the end of the specified year
+                        shouldEncash = currentYear > encashStartYear;
+                    }
+                } else {
+                    // Month-based encashing
+                    const targetMonth = (encashStartYear - 1) * 12 + encashStartMonth;
+                    if (encashTiming === 'start') {
+                        // Start encashing from the beginning of the specified month
+                        shouldEncash = month >= targetMonth;
+                    } else {
+                        // Start encashing from the end of the specified month
+                        shouldEncash = month > targetMonth;
+                    }
+                }
+                
+                if (shouldEncash) {
+                    totalEncashedInterest += interestBucket; // Move accrued interest to encashed total
+                } else {
+                    currentBalance += interestBucket; // Compound the interest until encash starts
+                }
             }
             interestBucket = 0; // Reset the bucket
         }
@@ -196,9 +320,60 @@ function calculate() {
         if (reinvestInterest) {
             trueEndingBalance = currentBalance + interestBucket;
         } else {
-            // In encash mode, the ending balance is just the current balance
-            // The interest is accumulated separately and will be shown in the final results
-            trueEndingBalance = currentBalance;
+            // In encash mode, check if we should show accumulated interest or just current balance
+            const currentYear = Math.ceil(month / 12);
+            let shouldEncash = false;
+            
+            if (encashPeriod === 'year') {
+                if (encashTiming === 'start') {
+                    shouldEncash = currentYear >= encashStartYear;
+                } else {
+                    shouldEncash = currentYear > encashStartYear;
+                }
+            } else {
+                // Month-based encashing
+                const targetMonth = (encashStartYear - 1) * 12 + encashStartMonth;
+                if (encashTiming === 'start') {
+                    shouldEncash = month >= targetMonth;
+                } else {
+                    shouldEncash = month > targetMonth;
+                }
+            }
+            
+            if (shouldEncash) {
+                // Interest is being encashed, so ending balance is just current balance
+                trueEndingBalance = currentBalance;
+            } else {
+                // Interest is still compounding, so include it in the balance
+                trueEndingBalance = currentBalance + interestBucket;
+            }
+        }
+        
+        // Calculate encashed amount for this month
+        let monthlyEncashedAmount = 0;
+        if (!reinvestInterest) {
+            const currentYear = Math.ceil(month / 12);
+            let shouldEncash = false;
+            
+            if (encashPeriod === 'year') {
+                if (encashTiming === 'start') {
+                    shouldEncash = currentYear >= encashStartYear;
+                } else {
+                    shouldEncash = currentYear > encashStartYear;
+                }
+            } else {
+                // Month-based encashing
+                const targetMonth = (encashStartYear - 1) * 12 + encashStartMonth;
+                if (encashTiming === 'start') {
+                    shouldEncash = month >= targetMonth;
+                } else {
+                    shouldEncash = month > targetMonth;
+                }
+            }
+            
+            if (shouldEncash) {
+                monthlyEncashedAmount = interestThisMonth;
+            }
         }
         
         monthlyBreakdownData[yearForMonthlyData].push({
@@ -206,7 +381,8 @@ function calculate() {
             contribution: contributionThisMonth,
             interest: interestThisMonth,
             endingBalance: trueEndingBalance,
-            startingBalance: monthStartingBalance
+            startingBalance: monthStartingBalance,
+            encashedAmount: monthlyEncashedAmount
         });
 
         // 3f. Check for end of year to update table and chart data
@@ -220,31 +396,67 @@ function calculate() {
             if (reinvestInterest) {
                 endingBalanceForTable = currentBalance + interestBucket;
             } else {
-                // In encash mode, show the current balance (principal + contributions)
-                // The total encashed interest is shown separately in the final results
-                endingBalanceForTable = currentBalance;
+                // In encash mode, check if we should show accumulated interest or just current balance
+                let shouldEncash = false;
+                
+                if (encashPeriod === 'year') {
+                    if (encashTiming === 'start') {
+                        shouldEncash = year >= encashStartYear;
+                    } else {
+                        shouldEncash = year > encashStartYear;
+                    }
+                } else {
+                    // Month-based encashing - check if we're past the target month
+                    const targetMonth = (encashStartYear - 1) * 12 + encashStartMonth;
+                    const currentEndMonth = year * 12;
+                    if (encashTiming === 'start') {
+                        shouldEncash = currentEndMonth >= targetMonth;
+                    } else {
+                        shouldEncash = currentEndMonth > targetMonth;
+                    }
+                }
+                
+                if (shouldEncash) {
+                    // Interest is being encashed, so ending balance is just current balance
+                    endingBalanceForTable = currentBalance;
+                } else {
+                    // Interest is still compounding, so include it in the balance
+                    endingBalanceForTable = currentBalance + interestBucket;
+                }
             }
 
-            row.innerHTML = `
+            // Create row with or without encashed column based on interest strategy
+            let rowHTML = `
                 <td>${year}</td>
                 <td>${formatMoney(yearlyData.startingBalance)}</td>
                 <td>${formatMoney(yearlyData.interest)}</td>
                 <td>${formatMoney(yearlyData.contribution)}</td>
                 <td>${formatMoney(endingBalanceForTable)}</td>
             `;
+            
+            if (!reinvestInterest) {
+                // Calculate yearly encashed amount
+                let yearlyEncashedAmount = 0;
+                if (monthlyBreakdownData[year]) {
+                    yearlyEncashedAmount = monthlyBreakdownData[year].reduce((sum, monthData) => sum + monthData.encashedAmount, 0);
+                }
+                rowHTML += `<td>${formatMoney(yearlyEncashedAmount)}</td>`;
+            }
+            
+            row.innerHTML = rowHTML;
             breakdownBody.appendChild(row);
 
             yearlyData.startingBalance = endingBalanceForTable;
             yearlyData.interest = 0;
             yearlyData.contribution = 0;
             
-            // Update contribution for next year
-            currentAdditionalContribution *= (1 + contributionIncreasePercent);
+
 
             chartLabels.push(`Year ${year}`);
             balanceData.push(endingBalanceForTable);
             totalContributionsData.push(totalContributions);
             totalInterestData.push(totalInterestEarned);
+            totalEncashedData.push(totalEncashedInterest);
         }
     }
 
@@ -267,9 +479,33 @@ function calculate() {
     if (reinvestInterest) {
         finalBalance = currentBalance + interestBucket;
     } else {
-        // In encash mode, the final balance is just the current balance (principal + contributions)
-        // The total encashed interest is shown separately
-        finalBalance = currentBalance;
+        // In encash mode, check if we should include accumulated interest in final balance
+        let shouldEncash = false;
+        
+        if (encashPeriod === 'year') {
+            if (encashTiming === 'start') {
+                shouldEncash = years >= encashStartYear;
+            } else {
+                shouldEncash = years > encashStartYear;
+            }
+        } else {
+            // Month-based encashing
+            const targetMonth = (encashStartYear - 1) * 12 + encashStartMonth;
+            const totalMonthsEnd = years * 12;
+            if (encashTiming === 'start') {
+                shouldEncash = totalMonthsEnd >= targetMonth;
+            } else {
+                shouldEncash = totalMonthsEnd > targetMonth;
+            }
+        }
+        
+        if (shouldEncash) {
+            // Interest is being encashed, so final balance is just current balance
+            finalBalance = currentBalance;
+        } else {
+            // Interest is still compounding, so include it in the final balance
+            finalBalance = currentBalance + interestBucket;
+        }
     }
 
     // Debug logging for encash mode
@@ -286,8 +522,23 @@ function calculate() {
     document.getElementById('total-invested').textContent = formatMoney(totalInvested);
     document.getElementById('total-interest').textContent = formatMoney(totalInterestEarned);
 
+    // Show/hide encashed amount card and column header based on interest strategy
+    const encashedAmountCard = document.getElementById('encashed-amount-card');
+    const encashedColumnHeader = document.getElementById('encashed-column-header');
+    
+    if (!reinvestInterest) {
+        // Show encashed amount card and update the value
+        document.getElementById('total-encashed').textContent = formatMoney(totalEncashedInterest);
+        encashedAmountCard.classList.remove('hidden');
+        encashedColumnHeader.classList.remove('hidden');
+    } else {
+        // Hide encashed amount card and column header
+        encashedAmountCard.classList.add('hidden');
+        encashedColumnHeader.classList.add('hidden');
+    }
+
     document.getElementById('result').classList.remove('hidden');
-    renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData);
+    renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData, totalEncashedData, reinvestInterest);
     addTableExpandListener(monthlyBreakdownData, reinvestInterest);
 }
 
@@ -317,26 +568,41 @@ function addTableExpandListener(monthlyData, reinvestInterest) {
 
         const headerRow = document.createElement('tr');
         headerRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
-        headerRow.innerHTML = `
+        
+        // Create header with or without encashed column based on interest strategy
+        let headerHTML = `
             <th>Month</th>
             <th>Starting Balance</th>
             <th>Interest Earned</th>
             <th>Contribution</th>
             <th>Ending Balance</th>
         `;
+        
+        if (!reinvestInterest) {
+            headerHTML += `<th>Encashed Amount</th>`;
+        }
+        
+        headerRow.innerHTML = headerHTML;
         fragment.appendChild(headerRow);
 
         yearData.forEach((data, index) => {
             const monthlyRow = document.createElement('tr');
             monthlyRow.classList.add('monthly-row', `monthly-row-for-year-${year}`);
 
-            monthlyRow.innerHTML = `
+            // Create row with or without encashed column based on interest strategy
+            let rowHTML = `
                 <td>${data.month}</td>
                 <td>${formatMoney(data.startingBalance)}</td>
                 <td>${formatMoney(data.interest)}</td>
                 <td>${formatMoney(data.contribution)}</td>
                 <td>${formatMoney(data.endingBalance)}</td>
             `;
+            
+            if (!reinvestInterest) {
+                rowHTML += `<td>${formatMoney(data.encashedAmount)}</td>`;
+            }
+            
+            monthlyRow.innerHTML = rowHTML;
             fragment.appendChild(monthlyRow);
         });
 
@@ -346,7 +612,7 @@ function addTableExpandListener(monthlyData, reinvestInterest) {
 
 let investmentChart = null;
 
-function renderChart(labels, balanceData, contributionsData, interestData) {
+function renderChart(labels, balanceData, contributionsData, interestData, encashedData, reinvestInterest) {
     const ctx = document.getElementById('investment-chart').getContext('2d');
 
     if (investmentChart) {
@@ -370,60 +636,82 @@ function renderChart(labels, balanceData, contributionsData, interestData) {
     const chartColors = {
         contributions: '#ff9f40', // Orange - friendly alternative to red
         interest: '#36a2eb',      // Blue - matches card 2
-        balance: '#4bc0c0'        // Teal - matches card 3
+        balance: '#4bc0c0',       // Teal - matches card 3
+        encashed: '#4caf50'       // Green - matches encashed amount card
     };
     
     // Update card colors to match chart colors
     updateCardColors(chartColors);
 
+    // Create datasets array
+    const datasets = [
+        {
+            label: 'Total Contributions',
+            data: contributionsData,
+            borderColor: chartColors.contributions,
+            backgroundColor: chartColors.contributions + '20',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: chartColors.contributions,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 3
+        },
+        {
+            label: 'Total Interest',
+            data: interestData,
+            borderColor: chartColors.interest,
+            backgroundColor: chartColors.interest + '20',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: chartColors.interest,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 3
+        },
+        {
+            label: 'Total Balance',
+            data: balanceData,
+            borderColor: chartColors.balance,
+            backgroundColor: chartColors.balance + '20',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: chartColors.balance,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 3
+        }
+    ];
+
+    // Add encashed amount dataset only when encash mode is selected
+    if (!reinvestInterest) {
+        datasets.push({
+            label: 'Total Encashed Amount',
+            data: encashedData,
+            borderColor: chartColors.encashed,
+            backgroundColor: chartColors.encashed + '20',
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: chartColors.encashed,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 3
+        });
+    }
+
     investmentChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [
-                {
-                    label: 'Total Contributions',
-                    data: contributionsData,
-                    borderColor: chartColors.contributions,
-                    backgroundColor: chartColors.contributions + '20',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: chartColors.contributions,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 3
-                },
-                {
-                    label: 'Total Interest',
-                    data: interestData,
-                    borderColor: chartColors.interest,
-                    backgroundColor: chartColors.interest + '20',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: chartColors.interest,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 3
-                },
-                {
-                    label: 'Total Balance',
-                    data: balanceData,
-                    borderColor: chartColors.balance,
-                    backgroundColor: chartColors.balance + '20',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: chartColors.balance,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 3
-                }
-            ]
+            datasets: datasets
         },
         options: {
             responsive: true,
@@ -700,7 +988,7 @@ function updateCardColors(chartColors) {
         cards[0].querySelector('p').style.color = chartColors.balance;
     }
     
-    // Card 2: Total Invested (Pink/Red) - matches chart.data.datasets[0] (Total Contributions)
+    // Card 2: Total Invested (Orange) - matches chart.data.datasets[0] (Total Contributions)
     if (cards[1]) {
         cards[1].style.background = `${chartColors.contributions}20`; // Low opacity background like chart fill
         cards[1].style.borderColor = chartColors.contributions;
@@ -716,5 +1004,15 @@ function updateCardColors(chartColors) {
         cards[2].style.color = chartColors.interest; // Full opacity text
         cards[2].querySelector('h3').style.color = chartColors.interest;
         cards[2].querySelector('p').style.color = chartColors.interest;
+    }
+    
+    // Card 4: Total Encashed Amount (Green) - matches chart.data.datasets[3] (Total Encashed Amount)
+    const encashedCard = document.getElementById('encashed-amount-card');
+    if (encashedCard && !encashedCard.classList.contains('hidden')) {
+        encashedCard.style.background = `${chartColors.encashed}20`; // Low opacity background like chart fill
+        encashedCard.style.borderColor = chartColors.encashed;
+        encashedCard.style.color = chartColors.encashed; // Full opacity text
+        encashedCard.querySelector('h3').style.color = chartColors.encashed;
+        encashedCard.querySelector('p').style.color = chartColors.encashed;
     }
 }

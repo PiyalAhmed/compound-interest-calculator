@@ -130,6 +130,81 @@ body {
     font-weight: 600;
 }
 
+/* Hidden elements */
+.hidden {
+    display: none !important;
+}
+
+/* Encash timing options styling */
+#encash-timing-options .schedule-row {
+    margin-bottom: 12px;
+}
+
+#encash-timing-options .schedule-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Encash timing container styling */
+.encash-timing-container {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.timing-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 10px;
+}
+
+.timing-row:last-child {
+    margin-bottom: 0;
+}
+
+.timing-row label {
+    min-width: 90px;
+    margin: 0;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.85rem;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.timing-row select,
+.timing-row input[type="number"] {
+    flex: 1;
+    max-width: 180px;
+}
+
+.encash-summary {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #e3f2fd;
+    border-radius: 6px;
+    border-left: 4px solid #2196f3;
+}
+
+.encash-summary small {
+    color: #1565c0;
+    font-weight: 500;
+    font-style: normal;
+}
+
+/* Encashed amount card styling */
+#encashed-amount-card {
+    background: #4caf5020 !important;
+    border-color: #4caf50 !important;
+    color: #4caf50 !important;
+}
+
+#encashed-amount-card h3,
+#encashed-amount-card p {
+    color: #4caf50 !important;
+}
+
 /* Contribution Schedule Layout */
 .contribution-schedule {
     background: #f8f9fa;
@@ -909,4 +984,9 @@ tr.expanded {
     .result-card p {
         font-size: 1.3rem;
     }
+}
+
+/* Contribution increase frequency styling */
+#contribution-increase-frequency {
+    min-width: 120px;
 }

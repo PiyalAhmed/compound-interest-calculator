@@ -44,18 +44,65 @@
                 
                 <div class="form-group">
                     <label>Interest Strategy</label>
-                    <div class="contribution-schedule">
-                        <div class="schedule-row">
-                            <div class="radio-options vertical-options">
-                                <div class="radio-option">
-                                    <input type="radio" id="reinvest-interest" name="interest-strategy" value="reinvest" checked>
-                                    <label for="reinvest-interest">Reinvest the interests back</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="encash-interest" name="interest-strategy" value="encash">
-                                    <label for="encash-interest">Encash the interests</label>
-                                </div>
-                            </div>
+                    <div class="encash-timing-container">
+                        <div class="timing-row">
+                            <label for="interest-strategy-select">Strategy:</label>
+                            <select id="interest-strategy-select">
+                                <option value="reinvest" selected>Reinvest the interests back</option>
+                                <option value="encash">Encash the interests</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Encash Timing Options (hidden by default) -->
+                <div id="encash-timing-options" class="form-group hidden">
+                    <label>Start Encashing From</label>
+                    <div class="encash-timing-container">
+                        <div class="timing-row">
+                            <label for="encash-period-select">Time Period:</label>
+                            <select id="encash-period-select">
+                                <option value="year">Year</option>
+                                <option value="month">Specific Month</option>
+                            </select>
+                        </div>
+                        
+                        <div class="timing-row">
+                            <label for="encash-timing-select">Timing:</label>
+                            <select id="encash-timing-select">
+                                <option value="start">Beginning of</option>
+                                <option value="end">End of</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Year selection (always visible) -->
+                        <div class="timing-row">
+                            <label for="encash-year-input">Year:</label>
+                            <input type="number" id="encash-year-input" value="1" min="1" style="width: 80px;">
+                        </div>
+                        
+                        <!-- Month selection (hidden by default) -->
+                        <div id="encash-month-row" class="timing-row hidden">
+                            <label for="encash-month-select">Month:</label>
+                            <select id="encash-month-select">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Summary text -->
+                        <div class="encash-summary">
+                            <small id="encash-summary-text">Interest will compound until the beginning of year 1, then be encashed monthly.</small>
                         </div>
                     </div>
                 </div>
@@ -67,39 +114,50 @@
                 
                 <div class="form-group">
                     <label>Contribution Schedule</label>
-                    <div class="contribution-schedule">
-                        <div class="schedule-row">
-                            <span class="schedule-label">Contribute at the</span>
-                            <div class="radio-options">
-                                <div class="radio-option">
-                                    <input type="radio" id="timing-start" name="contribution-timing" value="start" checked>
-                                    <label for="timing-start">beginning</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="timing-end" name="contribution-timing" value="end">
-                                    <label for="timing-end">end</label>
-                                </div>
-                            </div>
+                    <div class="encash-timing-container">
+                        <div class="timing-row">
+                            <label for="contribution-timing-select">Timing:</label>
+                            <select id="contribution-timing-select">
+                                <option value="start" selected>Beginning of</option>
+                                <option value="end">End of</option>
+                            </select>
                         </div>
-                        <div class="schedule-row">
-                            <span class="schedule-label">of each</span>
-                            <div class="radio-options">
-                                <div class="radio-option">
-                                    <input type="radio" id="frequency-month" name="contribution-frequency" value="month" checked>
-                                    <label for="frequency-month">month</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="frequency-year" name="contribution-frequency" value="year">
-                                    <label for="frequency-year">year</label>
-                                </div>
-                            </div>
+                        
+                        <div class="timing-row">
+                            <label for="contribution-frequency-select">Period:</label>
+                            <select id="contribution-frequency-select">
+                                <option value="month" selected>Month</option>
+                                <option value="year">Year</option>
+                            </select>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="contribution-increase">Annual Increase (%)</label>
-                    <input type="number" id="contribution-increase" value="0" min="0" step="0.01">
+                    <label>Contribution Increase</label>
+                    <div class="encash-timing-container">
+                        <div class="timing-row">
+                            <label for="contribution-increase">Increase by:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="number" id="contribution-increase" value="0" min="0" step="0.01" style="width: 80px;">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="timing-row">
+                            <label for="contribution-increase-frequency">Frequency:</label>
+                            <select id="contribution-increase-frequency">
+                                <option value="1">After every Year</option>
+                                <option value="2">After every 6 Months</option>
+                                <option value="4">After every Quarter</option>
+                                <option value="12">After every Month</option>
+                                <option value="24">After every 2 Weeks</option>
+                                <option value="26">After every Bi-week</option>
+                                <option value="52">After every Week</option>
+                                <option value="365">After every Day</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit">Calculate</button>
@@ -127,6 +185,11 @@
                         <h3>Interest Earned</h3>
                         <p id="total-interest">$0.00</p>
                     </div>
+                    <!-- Encashed Amount Card (hidden by default) -->
+                    <div id="encashed-amount-card" class="result-card hidden">
+                        <h3>Total Encashed Amount</h3>
+                        <p id="total-encashed">$0.00</p>
+                    </div>
                 </div>
                 
 
@@ -142,6 +205,8 @@
                                 <th>Interest Earned</th>
                                 <th>Contributions</th>
                                 <th>Ending Balance</th>
+                                <!-- Encashed Amount Column (hidden by default) -->
+                                <th id="encashed-column-header" class="hidden">Encashed Amount</th>
                             </tr>
                         </thead>
                         <tbody id="breakdown-body">
