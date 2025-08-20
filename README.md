@@ -13,7 +13,8 @@ A simple web-based compound interest calculator built with HTML, CSS, and JavaSc
 -   **Reinvest Interest**: A checkbox to choose between compound interest (checked) and simple interest (unchecked).
     -   **Compound Interest**: Interest is earned on the current balance and is reinvested.
     -   **Simple Interest**: Interest is earned only on the initial principal amount. This interest is not reinvested and is tracked separately as "Total Encashed Interest".
--   **Results Breakdown**: A year-by-year table showing the starting balance, interest earned, total contributions for the year, and the ending balance.
+-   **Chart Visualization**: A line chart that visually represents the growth of the total balance, total contributions, and total interest over the investment period.
+-   **Expandable Yearly Breakdown**: The year-by-year results table is now interactive. Click on any year's row to see a detailed monthly breakdown for that year.
 -   **Summary Statistics**: A detailed summary including the final balance, total contributions, total interest earned, and a breakdown of whether that interest was compounded or "encashed" (for simple interest).
 
 ## How to Use
