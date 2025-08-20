@@ -10,10 +10,10 @@ A simple web-based compound interest calculator built with HTML, CSS, and JavaSc
 -   **Monthly Contribution**: A fixed amount you contribute to your investment each month.
 -   **Annual Increase in Monthly Contribution**: The percentage by which your monthly contribution increases each year.
 -   **Reinvest Interest**: A checkbox to choose between compound interest (checked) and simple interest (unchecked).
-    -   **Compound Interest**: Interest is earned on the current balance.
-    -   **Simple Interest**: Interest is earned only on the initial principal amount.
+    -   **Compound Interest**: Interest is earned on the current balance and is reinvested.
+    -   **Simple Interest**: Interest is earned only on the initial principal amount. This interest is not reinvested and is tracked separately as "Total Encashed Interest".
 -   **Results Breakdown**: A year-by-year table showing the starting balance, interest earned, total contributions for the year, and the ending balance.
--   **Summary Statistics**: A summary including the final balance, total principal invested (initial principal + all contributions), and total interest earned.
+-   **Summary Statistics**: A detailed summary including the final balance, total contributions, total interest earned, and a breakdown of whether that interest was compounded or "encashed" (for simple interest).
 
 ## How to Use
 
