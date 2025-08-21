@@ -52,6 +52,20 @@
                                 <option value="encash">Encash the interests</option>
                             </select>
                         </div>
+                        
+                        <!-- Encash Percentage (hidden by default) -->
+                        <div id="encash-percentage-row" class="timing-row hidden">
+                            <label for="encash-percentage">Encash Percentage:</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="number" id="encash-percentage" value="100" min="1" max="100" step="1" style="width: 80px;">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Help text for encash percentage -->
+                        <div id="encash-percentage-help" class="encash-summary hidden">
+                            <small id="encash-percentage-note">40% of interest will be encashed, 60% will be reinvested.</small>
+                        </div>
                     </div>
                 </div>
                 
@@ -216,7 +230,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Tax & Inflation</label>
+                    <label>Final Tax & Inflation</label>
                     <div class="encash-timing-container">
                         <div class="timing-row">
                             <label for="tax-rate">Tax Rate:</label>

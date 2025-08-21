@@ -44,12 +44,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners for interest strategy changes
     const interestStrategySelect = document.getElementById('interest-strategy-select');
     const encashTimingOptions = document.getElementById('encash-timing-options');
+    const encashPercentageRow = document.getElementById('encash-percentage-row');
+    const encashPercentageHelp = document.getElementById('encash-percentage-help');
     
     interestStrategySelect.addEventListener('change', function() {
         if (this.value === 'encash') {
             encashTimingOptions.classList.remove('hidden');
+            encashPercentageRow.classList.remove('hidden');
+            encashPercentageHelp.classList.remove('hidden');
         } else {
             encashTimingOptions.classList.add('hidden');
+            encashPercentageRow.classList.add('hidden');
+            encashPercentageHelp.classList.add('hidden');
         }
     });
     
@@ -66,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const timing = encashTimingSelect.value;
         const year = encashYearInput.value;
         const month = encashMonthSelect.options[encashMonthSelect.selectedIndex].text;
+        const encashPercentage = parseFloat(document.getElementById('encash-percentage')?.value) || 100;
         
         let summaryText = `Interest will compound until the ${timing} of `;
         
@@ -75,7 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
             summaryText += `year ${year}`;
         }
         
-        summaryText += ', then be encashed monthly.';
+        if (encashPercentage === 100) {
+            summaryText += ', then be encashed monthly.';
+        } else {
+            summaryText += `, then ${encashPercentage}% will be encashed monthly and ${100 - encashPercentage}% will be reinvested.`;
+        }
+        
         encashSummaryText.textContent = summaryText;
     }
     
@@ -91,6 +103,29 @@ document.addEventListener('DOMContentLoaded', function() {
     encashTimingSelect.addEventListener('change', updateEncashSummary);
     encashYearInput.addEventListener('input', updateEncashSummary);
     encashMonthSelect.addEventListener('change', updateEncashSummary);
+    
+    // Add event listener for encash percentage changes
+    const encashPercentageInput = document.getElementById('encash-percentage');
+    const encashPercentageNote = document.getElementById('encash-percentage-note');
+    
+    function updateEncashPercentageNote() {
+        const percentage = parseFloat(encashPercentageInput.value) || 100;
+        const reinvestPercentage = 100 - percentage;
+        
+        if (percentage === 100) {
+            encashPercentageNote.textContent = "All interest will be encashed.";
+        } else {
+            encashPercentageNote.textContent = `${percentage}% of interest will be encashed, ${reinvestPercentage}% will be reinvested.`;
+        }
+    }
+    
+    encashPercentageInput.addEventListener('input', function() {
+        updateEncashSummary();
+        updateEncashPercentageNote();
+    });
+    
+    // Initial note update
+    updateEncashPercentageNote();
     
     // Initial summary update
     updateEncashSummary();
@@ -208,6 +243,7 @@ function calculate() {
     const encashPeriod = document.getElementById('encash-period-select')?.value || 'year';
     const encashStartYear = parseInt(document.getElementById('encash-year-input')?.value) || 1;
     const encashStartMonth = parseInt(document.getElementById('encash-month-select')?.value) || 1;
+    const encashPercentage = parseFloat(document.getElementById('encash-percentage')?.value) || 100;
     
     // Tax and inflation options
     const taxRate = parseFloat(document.getElementById('tax-rate').value) || 0;
@@ -253,6 +289,12 @@ function calculate() {
                 alert("Encash start month must be between 1 and 12.");
                 return;
             }
+        }
+        
+        // Validate encash percentage
+        if (encashPercentage < 1 || encashPercentage > 100) {
+            alert("Encash percentage must be between 1 and 100.");
+            return;
         }
     }
     
@@ -463,7 +505,12 @@ function calculate() {
                 }
                 
                 if (shouldEncash) {
-                    totalEncashedInterest += interestBucket; // Move accrued interest to encashed total
+                    // Calculate partial encashing based on percentage
+                    const encashAmount = interestBucket * (encashPercentage / 100);
+                    const reinvestAmount = interestBucket - encashAmount;
+                    
+                    totalEncashedInterest += encashAmount; // Move portion to encashed total
+                    currentBalance += reinvestAmount; // Reinvest the remaining portion
                 } else {
                     currentBalance += interestBucket; // Compound the interest until encash starts
                 }
@@ -535,7 +582,8 @@ function calculate() {
             }
             
             if (shouldEncash) {
-                monthlyEncashedAmount = interestThisMonth;
+                // Calculate the actual encashed amount based on percentage
+                monthlyEncashedAmount = interestThisMonth * (encashPercentage / 100);
             }
         }
         
@@ -634,7 +682,12 @@ function calculate() {
         if (reinvestInterest) {
             currentBalance += interestBucket;
         } else {
-            totalEncashedInterest += interestBucket;
+            // Calculate partial encashing for remaining interest
+            const encashAmount = interestBucket * (encashPercentage / 100);
+            const reinvestAmount = interestBucket - encashAmount;
+            
+            totalEncashedInterest += encashAmount; // Move portion to encashed total
+            currentBalance += reinvestAmount; // Reinvest the remaining portion
         }
         interestBucket = 0;
     }
