@@ -1,7 +1,6 @@
 # 🚀 Free Compound Interest Calculator 2024 | Advanced Investment Planning Tool
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen.svg)](https://piyalahmed.com/compound-interest-calculator)
 [![Calculator](https://img.shields.io/badge/Calculator-Online-blue.svg)](https://piyalahmed.com/compound-interest-calculator)
 
 > **"Compound interest is the 8th wonder of the world. He who understands it, earns it; he who doesn't, pays it."** - Albert Einstein
@@ -45,7 +44,7 @@ A **professional-grade, feature-rich compound interest calculator** built with m
 ## 🛠️ **Technical Specifications**
 
 ### **Frontend Technologies**
-- **HTML5**: Semantic markup for better SEO and accessibility
+- **HTML5**: Semantic markup for better accessibility
 - **CSS3**: Modern styling with CSS Grid, Flexbox, and animations
 - **JavaScript (ES6+)**: Vanilla JS with modern syntax and best practices
 - **Chart.js 3.9.1**: Professional-grade data visualization library
@@ -54,7 +53,6 @@ A **professional-grade, feature-rich compound interest calculator** built with m
 - **⚡ Fast Loading**: Optimized for speed and performance
 - **📱 Mobile-First**: Responsive design that works on all devices
 - **♿ Accessibility**: WCAG compliant with keyboard navigation support
-- **🔍 SEO Optimized**: Comprehensive meta tags and structured data
 - **📊 Analytics Ready**: Prepared for Google Analytics integration
 
 ### **Browser Support**
@@ -111,7 +109,7 @@ A **professional-grade, feature-rich compound interest calculator** built with m
 ### **Local Development**
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/compound-interest-calculator.git
+git clone https://github.com/piyalahmed/compound-interest-calculator.git
 
 # Navigate to project directory
 cd compound-interest-calculator
@@ -124,48 +122,6 @@ open index.html
 1. **Fork or clone** this repository
 2. **Push to GitHub** with your changes
 3. **Enable GitHub Pages** in repository settings
-4. **Set custom domain** (optional but recommended)
-
-### **Custom Domain Setup**
-1. **Configure DNS**: Point your domain to GitHub Pages
-2. **Update CNAME**: Add your domain to CNAME file
-3. **SSL Certificate**: GitHub provides automatic HTTPS
-4. **Verify Setup**: Test your custom domain
-
-## 📊 **Performance Metrics**
-
-### **Page Speed**
-- **Lighthouse Score**: 95+ (Performance, Accessibility, Best Practices, SEO)
-- **First Contentful Paint**: < 1.5 seconds
-- **Largest Contentful Paint**: < 2.5 seconds
-- **Cumulative Layout Shift**: < 0.1
-
-### **SEO Optimization**
-- **Meta Tags**: Comprehensive title, description, and keywords
-- **Structured Data**: JSON-LD markup for rich snippets
-- **Semantic HTML**: Proper heading hierarchy and content structure
-- **Mobile Optimization**: Mobile-first responsive design
-- **Page Speed**: Optimized for Core Web Vitals
-
-## 🌐 **SEO Strategy**
-
-### **Target Keywords**
-- Primary: "compound interest calculator"
-- Secondary: "investment calculator", "retirement calculator"
-- Long-tail: "free compound interest calculator online"
-- Local: "compound interest calculator 2024"
-
-### **Content Strategy**
-- **Comprehensive Guide**: 3000+ words of educational content
-- **FAQ Section**: Common questions with detailed answers
-- **Real Examples**: Practical calculations and scenarios
-- **Expert Insights**: Professional financial advice and tips
-
-### **Technical SEO**
-- **Structured Data**: Rich snippets for better search results
-- **Sitemap**: XML sitemap for search engine discovery
-- **Robots.txt**: Proper crawling instructions
-- **Meta Tags**: Optimized for social sharing and search
 
 ## 🤝 **Contributing**
 
@@ -201,7 +157,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Documentation**: Check this README first
 - **Issues**: Open a GitHub issue for bugs or problems
 - **Discussions**: Use GitHub Discussions for questions
-- **Email**: Contact [your-email@domain.com]
 
 ### **Feature Requests**
 - **GitHub Issues**: Open an issue with the "enhancement" label
@@ -223,20 +178,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - **Social Features**: Share and compare strategies
 - **API Access**: Developer-friendly API endpoints
 
-## 📈 **Success Metrics**
-
-### **Current Performance**
-- **Page Views**: Growing monthly traffic
-- **User Engagement**: High time-on-page metrics
-- **Search Rankings**: Improving for target keywords
-- **User Feedback**: Positive reviews and suggestions
-
-### **Goals**
-- **Top 3 Ranking**: For "compound interest calculator"
-- **10K+ Monthly Users**: By end of 2024
-- **User Satisfaction**: 95%+ positive feedback
-- **Feature Adoption**: 80%+ use advanced features
-
 ---
 
 ## 🌟 **Why Choose Our Calculator?**
@@ -249,7 +190,7 @@ Unlike basic calculators, ours includes:
 - **Professional-grade visualizations**
 
 ### **Educational Value**
-- **3000+ words of expert content**
+- **Comprehensive expert content**
 - **Real-world examples and scenarios**
 - **Best practices and strategies**
 - **Common mistakes to avoid**
