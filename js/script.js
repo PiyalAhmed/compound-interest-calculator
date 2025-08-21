@@ -1351,3 +1351,71 @@ function showResults() {
         initialStateDiv.classList.add('hidden');
     }
 }
+
+// Function to adjust results section height to match calculator section
+function adjustResultsHeight() {
+    const calculatorInputs = document.querySelector('.calculator-inputs');
+    const calculatorResults = document.querySelector('.calculator-results');
+    
+    if (calculatorInputs && calculatorResults) {
+        const calculatorHeight = calculatorInputs.offsetHeight;
+        calculatorResults.style.height = calculatorHeight + 'px';
+        calculatorResults.style.overflowY = 'auto';
+        calculatorResults.style.overflowX = 'hidden';
+    }
+}
+
+// Adjust height on page load
+document.addEventListener('DOMContentLoaded', function() {
+    adjustResultsHeight();
+    
+    // Adjust height when window resizes
+    window.addEventListener('resize', adjustResultsHeight);
+    
+    // Adjust height when form elements change (for dynamic content)
+    const formElements = document.querySelectorAll('#calculator-form input, #calculator-form select');
+    formElements.forEach(element => {
+        element.addEventListener('change', adjustResultsHeight);
+        element.addEventListener('input', adjustResultsHeight);
+    });
+    
+    // Additional event listeners for elements that can dynamically show/hide content
+    const additionalContribution = document.getElementById('additional-contribution');
+    if (additionalContribution) {
+        additionalContribution.addEventListener('input', adjustResultsHeight);
+        additionalContribution.addEventListener('change', adjustResultsHeight);
+    }
+    
+    // Monitor checkbox changes that can show/hide form sections
+    const checkboxes = document.querySelectorAll('#calculator-form input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', adjustResultsHeight);
+    });
+    
+    // Monitor select changes that can show/hide form sections
+    const selects = document.querySelectorAll('#calculator-form select');
+    selects.forEach(select => {
+        select.addEventListener('change', adjustResultsHeight);
+    });
+    
+    // Use MutationObserver to detect DOM changes that might affect height
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                // Small delay to ensure DOM has updated
+                setTimeout(adjustResultsHeight, 10);
+            }
+        });
+    });
+    
+    // Observe the calculator form for any DOM changes
+    const calculatorForm = document.getElementById('calculator-form');
+    if (calculatorForm) {
+        observer.observe(calculatorForm, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+    }
+});

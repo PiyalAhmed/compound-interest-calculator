@@ -24,7 +24,6 @@ body {
     margin: 0 auto;
     padding: 20px;
     min-height: calc(100vh - 40px);
-    overflow: hidden; /* Prevent container scroll */
 }
 
 /* Calculator Inputs Section - Left Panel */
@@ -34,35 +33,29 @@ body {
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
-    height: calc(100vh - 40px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    height: fit-content;
+    overflow: visible;
     position: relative;
 }
 
 /* Calculator Results Section - Right Panel */
 .calculator-results {
-    height: calc(100vh - 40px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    height: fit-content;
+    overflow: visible;
 }
 
-/* Hide Scrollbars */
-.calculator-inputs::-webkit-scrollbar,
+/* Hide scrollbars for results section when it becomes scrollable */
 .calculator-results::-webkit-scrollbar {
     width: 0px;
     background: transparent;
-}
-
-.calculator-inputs {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
 }
 
 .calculator-results {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
 }
+
+/* JavaScript will dynamically set the height of results section to match calculator */
 
 .calculator-inputs h1 {
     text-align: center;
@@ -698,14 +691,13 @@ tr.expanded {
     .calculator-inputs {
         position: static;
         order: 1;
-        height: auto;
-        max-height: none;
+        height: fit-content;
     }
     
     .calculator-results {
         order: 2;
         height: auto;
-        max-height: none;
+        overflow: visible;
     }
 }
 
@@ -719,7 +711,7 @@ tr.expanded {
     .calculator-results {
         padding: 20px;
         height: auto;
-        max-height: none;
+        overflow: visible;
     }
     
     .calculator-inputs h1 {
@@ -872,6 +864,8 @@ tr.expanded {
     .calculator-inputs,
     .calculator-results {
         padding: 16px;
+        height: auto;
+        overflow: visible;
     }
     
     .calculator-inputs h1 {
