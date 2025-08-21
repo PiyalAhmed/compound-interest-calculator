@@ -813,6 +813,7 @@ function calculate() {
     }
 
     document.getElementById('result').classList.remove('hidden');
+    showResults(); // Show results and hide initial state
     renderChart(chartLabels, balanceData, totalContributionsData, totalInterestData, totalEncashedData, reinvestInterest);
     addTableExpandListener(monthlyBreakdownData, reinvestInterest, additionalContribution);
 }
@@ -1321,5 +1322,32 @@ function updateCardColors(chartColors) {
         inflationCard.style.color = chartColors.inflation; // Full opacity text
         inflationCard.querySelector('h3').style.color = chartColors.inflation;
         inflationCard.querySelector('p').style.color = chartColors.inflation;
+    }
+}
+
+// Show initial state when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    showInitialState();
+});
+
+// Function to show initial state
+function showInitialState() {
+    const resultDiv = document.getElementById('result');
+    const initialStateDiv = document.getElementById('initial-state');
+    
+    if (resultDiv && initialStateDiv) {
+        resultDiv.classList.add('hidden');
+        initialStateDiv.classList.remove('hidden');
+    }
+}
+
+// Function to show results
+function showResults() {
+    const resultDiv = document.getElementById('result');
+    const initialStateDiv = document.getElementById('initial-state');
+    
+    if (resultDiv && initialStateDiv) {
+        resultDiv.classList.remove('hidden');
+        initialStateDiv.classList.add('hidden');
     }
 }

@@ -1,0 +1,41 @@
+User-agent: *
+Allow: /
+
+# Allow all search engines to crawl the entire site
+# This includes the main calculator page and all educational content
+
+# Sitemap location
+Sitemap: https://piyalahmed.com/sitemap.xml
+
+# Crawl delay (optional - helps prevent overwhelming the server)
+Crawl-delay: 1
+
+# Specific rules for different user agents
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# Block access to any potential admin or system files
+Disallow: /admin/
+Disallow: /system/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /logs/
+
+# Allow access to important resources
+Allow: /compound-interest-calculator/
+Allow: /compound-interest-calculator/css/
+Allow: /compound-interest-calculator/js/
+Allow: /compound-interest-calculator/images/
