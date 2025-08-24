@@ -1,4 +1,4 @@
-# 🚀 Free Compound Interest Calculator 2024 | Advanced Investment Planning Tool
+# 🚀 Free Compound Interest Calculator 2025 | Advanced Investment Planning Tool
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Calculator](https://img.shields.io/badge/Calculator-Online-blue.svg)](https://piyalahmed.com/compound-interest-calculator)
